@@ -1,0 +1,134 @@
+<html>
+
+<head>
+		<!-- icon stylesheet link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+	
+	<!-- link with css -->
+	<link rel="stylesheet" type="text/css" href="style.css">
+	
+	<!-- covers almost all of the characters and symbols in the world!-->
+    <meta charset="UTF-8">
+	
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+	
+</head>
+
+<body>
+	<div class="navbar">
+		<img src="image/2.png" class="logo">
+		<ul>
+			<li><a href="index.html">Home</a></li>
+			<li><a href="#">Profile</a></li>
+			<li><a href="aboutus.html">About Us</a></li>
+			<li><a href="#">Contact Us</a></li>
+			<li><a href="member.html">Our Member</a></li>
+		</ul>
+	</div>
+	
+	<div id="pagecontainer">
+	<div id="pagewrap">
+		<div class="contentContact">
+			<form onSubmit="sendEmail(); reset(); return false;">
+				<h3> GET IN TOUCH </h3>
+				<input type="text" id="name" placeholder="Your Name" required>
+				<input type="text" id="email" placeholder="Email id" required>
+				<input type="text" id="phone" placeholder="Phone Number" required>
+				<textarea id="message" rows="4" placeholder="How can we help you?"></textarea>
+				<button type="submit"> Send </button>
+				
+			</form>
+		</div>
+	</div>
+	
+	<footer>
+		
+		<div class="rowindex">
+			<div class="columnindex">
+				<img src="image/2.png" class="logo">
+				<p>
+					The polyclinic provided services such as regular medical check-ups, as well as mental health services. 
+					Contribute to the care of patients suffering from behavioural issues — especially those from low 
+					socio-economic backgrounds.
+				</p>
+			</div>
+			
+			<div class="columnindex">
+				<h3> Office <div class="under"><span></span></div> </h3>
+				<p>No 28G, Jalan Semenyih Sentral 4,</p> 
+				<p>Taman Semenyih Sentral, </p>
+				<p>43500 Semenyih, Selangor</p>
+				<p>Malaysia</p>
+				<p class="email-id">poliklinikpenawar@gmail.com</p>
+				<h4> +60 - 31234567
+			</div>
+			
+			<div class="columnindex">
+				<div class="linkfooter">
+				<h3>Links <div class="under"><span></span></div> <h3/>
+				<ul>
+					<li><a href="index.html">Home</a></li>
+					<li><a href="#">Profile</a></li>
+					<li><a href="aboutus.html">About Us</a></li>
+					<li><a href="#">Contact Us</a></li>
+					<li><a href="member.html">Our Member</a></li>
+				</ul>
+				</div>
+			</div>
+			
+			<div class="columnindex">
+				<h3>Newsletter <div class="under"><span></span></div>  </h3>
+				<form>
+					<i class="fa-regular fa-envelope"></i>
+					<input type="email" placeholder=" enter your email id" required>
+					<button type="submit"><i class="fa-solid fa-arrow-right"></i></button>
+				</form>
+				
+				<div class="social-icons">
+					<i class="fa-brands fa-facebook"></i>
+					<i class="fa-brands fa-instagram"></i>
+					<i class="fa-brands fa-twitter"></i>
+					<i class="fa-brands fa-linkedin"></i>
+				</div>
+				
+			</div>
+			
+			
+			</div>
+			
+			<hr>
+			<p class="copyright"> MyPenawar Sdn Bhd &copy; 2022 - All Rights Reserved</p>
+		
+		</footer>
+	</div>
+	
+	
+	<script src=" https://smtpjs.com/v3/smtp.js"></script>
+	
+		<!--  link to send email online
+				https://www.youtube.com/watch?v=sGQSz22U8VM min:21
+		-->
+	
+	<script>
+		function sendEmail(){
+			Email.send({
+				Host : "smtp.elasticemail.com", 
+				Username : "2020479526@student.uitm.edu.my",
+				Password : "1F6BBE99949A1509D0B8FACAD1D427C24736",
+				To : document.getElementById("email").value,
+				From : "2020479526@student.uitm.edu.my",
+				Subject : "New Contact Form Enquiry",
+				Body : "Name : " + document.getElementById("name").value 
+						+ "<br> Email : " + document.getElementById("email").value 
+						+ "<br> Phone no : " + document.getElementById("phone").value 
+						+ "<br> Message : " + document.getElementById("message").value 
+			}).then(
+			  message => alert("Message Sent Successfully")
+			);
+		
+		}
+	</script>
+</body>
+
+</html>
