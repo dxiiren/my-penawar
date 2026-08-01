@@ -101,7 +101,7 @@
 
             // h-hotel account
             $mail->Username='2020479526@student.uitm.edu.my';
-            $mail->Password='1F6BBE99949A1509D0B8FACAD1D427C24736';
+            $mail->Password='REPLACE_WITH_YOUR_ELASTICEMAIL_API_KEY';
 
             // send by h-hotel email
             $mail->setFrom('2020479526@student.uitm.edu.my', 'Password Reset');

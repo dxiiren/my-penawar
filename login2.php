@@ -220,7 +220,7 @@
         
       Host: "smtp.elasticemail.com", 
       Username: "2020479526@student.uitm.edu.my",
-      Password: "1F6BBE99949A1509D0B8FACAD1D427C24736",
+      Password: "REPLACE_WITH_YOUR_ELASTICEMAIL_API_KEY",
       To: "mohdakmal875@gmail.com",
       From: "2020479526@student.uitm.edu.my",
       Subject: `${email} Just messaged you from the website form`,
