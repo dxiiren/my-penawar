@@ -1,8 +1,8 @@
 # Commands
 
 > **TL;DR** Everything routine is a `just` recipe — run `just` to list them. `start` /
-> `serve` / `stop` manage the dev server on port 8112, `lint` is the quality gate,
-> `claudex`/`claudeo`/`claudeh` launch Claude Code. PHP is pinned to
+> `serve` / `stop` manage the dev server on port 8112, `lint` + `test` are the quality
+> gates, `claudex`/`claudeo`/`claudeh` launch Claude Code. PHP is pinned to
 > `%LOCALAPPDATA%\Programs\php-8.4\php.exe`.
 
 ## Daily
@@ -14,6 +14,7 @@
 | `just serve` | Same server in the foreground — request log visible, Ctrl+C to stop |
 | `just stop` | Kill only `php.exe` processes whose command line contains this repo's path — other projects' servers are untouched |
 | `just lint` | `php -l` every `.php` file in the repo (recursive, skips `.git`); fails with a count if any file has a parse error |
+| `just test` | HTTP smoke-test suite (`tests/smoke.ps1`): the lint gate + the no-DB pages (home/about/contact/login form/`index.php`) against a private server on port **8614** — never touches the 8112 dev server and always kills its own server. DB-backed pages are deliberately out of scope (no MySQL in the loop) |
 
 ## Claude Code launchers
 
@@ -33,8 +34,9 @@
   you to run `pwsh ./setup.ps1`.
 - One-time machine setup is not a recipe: `pwsh ./setup.ps1` (idempotent — see
   [../02-setup/getting-started.md](../02-setup/getting-started.md)).
-- There are no test/build/format recipes because the repo has no test suite, build step,
-  or formatter — `lint` is the whole gate.
+- There are no build/format recipes because the repo has no build step or formatter.
+  The automated gates are `lint` (syntax) and `test` (HTTP smoke suite over the no-DB
+  pages); DB-backed behavior still needs a manual check against a real MySQL.
 
 ## Related docs
 

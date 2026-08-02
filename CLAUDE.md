@@ -26,8 +26,8 @@ in `mypenawar.sql`). No framework, no composer, no npm.
 | Frontend | HTML + `style.css` + inline `<style>` | Bootstrap 4, jQuery 3, Font Awesome, typed.js all loaded from CDNs — internet required for full styling |
 | Mail | Vendored PHPMailer 5.x in `Mail/phpmailer/` + SMTP.js | Used by the password-recovery flow; never edit the vendored library |
 | Serving | PHP built-in dev server | `just start` → `php -S 127.0.0.1:8112 -t .` |
-| Quality | `php -l` only | `just lint` syntax-lints every PHP file; no tests, no CI |
-| Task runner | `just` | `justfile` wraps start/serve/stop/lint; PHP pinned to `%LOCALAPPDATA%\Programs\php-8.4` |
+| Quality | `php -l` + HTTP smoke suite | `just lint` syntax-lints every PHP file; `just test` runs `tests/smoke.ps1` (no-DB pages on a private port-8614 server); no CI |
+| Task runner | `just` | `justfile` wraps start/serve/stop/lint/test; PHP pinned to `%LOCALAPPDATA%\Programs\php-8.4` |
 
 ### Project Structure
 
@@ -56,6 +56,7 @@ my-penawar/
   image/                  # logos, staff photos, background
   style.css               # shared stylesheet
   justfile, setup.ps1     # dev recipes + one-time machine setup
+  tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
   .docs/                  # numbered documentation set
   .claude/                # skills, hooks, settings, memory
 ```

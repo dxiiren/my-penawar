@@ -86,14 +86,16 @@ code does the same thing; the bar for NEW code is the checklist, not the legacy 
 
 ```powershell
 just lint
+just test
 ```
 
-It must be green (`php -l` over every `*.php`). A failure is an **issue** (blocking) —
-paste the failing output line. There is no test suite in this repo; if the branch
-changed page behavior, also load the page on `http://127.0.0.1:8112` (`just start`)
-and note what you saw. DB-backed pages need MySQL on `localhost:3307` — without it,
-verify the page still renders its static shell (see
-`.docs/06-troubleshooting/common-issues.md`).
+Both must be green: the `php -l` sweep and the HTTP smoke suite (`tests/smoke.ps1` —
+no-DB pages against a private server on port 8614). A failure in either is an **issue**
+(blocking) — paste the failing output line. The smoke suite does not cover DB-backed
+pages; if the branch changed page behavior, also load the page on
+`http://127.0.0.1:8112` (`just start`) and note what you saw. DB-backed pages need
+MySQL on `localhost:3307` — without it, verify the page still renders its static shell
+(see `.docs/06-troubleshooting/common-issues.md`).
 
 ## Step 5 — Finding labels & caps
 

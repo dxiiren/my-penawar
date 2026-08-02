@@ -35,7 +35,8 @@ my-penawar/
   Mail/phpmailer/         # vendored PHPMailer 5.x (third-party, do not edit)
   image/                  # logos, staff photos, background
   style.css               # shared stylesheet
-  justfile                # dev recipes (start/serve/stop/lint + claude launchers)
+  justfile                # dev recipes (start/serve/stop/lint/test + claude launchers)
+  tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
   setup.ps1               # one-time machine setup (idempotent)
   README.md               # entry point + quick start
   CLAUDE.md               # AI-assistant briefing (stack, rules, gotchas)

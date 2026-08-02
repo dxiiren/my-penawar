@@ -1,7 +1,7 @@
 # Development workflow
 
 > **TL;DR** Edit a page file, refresh the browser (`php -S` has no cache), `just lint`
-> before every commit. Branch for features, Conventional Commits, no attribution
+> and `just test` before every commit. Branch for features, Conventional Commits, no attribution
 > footers. Don't retrofit the legacy pages; don't copy their SQL-interpolation or
 > plaintext-password patterns into NEW code.
 
@@ -10,8 +10,11 @@
 1. `just start` (or `just serve` in a second terminal to watch request logs).
 2. Edit the page script — each screen is one root-level `.php`/`.html` file; there is no
    build step, so a browser refresh shows the change immediately.
-3. `just lint` — `php -l` over every PHP file. This is the repo's entire automated
-   quality gate (no composer, no PHPUnit, no CI), so treat a lint failure as a blocker.
+3. `just lint` — `php -l` over every PHP file — then `just test`, the HTTP smoke suite
+   (`tests/smoke.ps1`): the same lint sweep plus the no-DB pages served from a private
+   server on port 8614. No composer, no PHPUnit, no CI — these two local gates are the
+   automation; treat a failure in either as a blocker. DB-backed behavior still needs a
+   manual check against a real MySQL on 3307.
 4. Commit with a Conventional Commits message (`feat:`, `fix:`, `docs:` ...) — the
    `/commit` skill automates this. PRs via `/create-pr`, self-review via
    `/pre-pr-review`.

@@ -92,8 +92,31 @@ Run `just` with no arguments to list every recipe. The ones you'll use daily:
 | `just start` | Start the PHP dev server on http://127.0.0.1:8112 (background window) |
 | `just serve` | Same server in the foreground — watch request logs, Ctrl+C to stop |
 | `just stop` | Kill only THIS repo's `php.exe` processes |
-| `just lint` | `php -l` syntax-check every PHP file (the repo's only quality gate) |
+| `just lint` | `php -l` syntax-check every PHP file |
+| `just test` | HTTP smoke-test suite: lint gate + the no-DB pages on a private server (port 8614) |
 | `just claudex` | Launch Claude Code (Sonnet, all permissions) |
+
+## Testing
+
+`just test` runs [`tests/smoke.ps1`](tests/smoke.ps1) — an HTTP smoke-test suite scoped
+to what works **without MySQL** (the "Works with no database at all" list above):
+
+1. **Lint gate** — `php -l` over every `.php` file (same sweep as `just lint`).
+2. **HTTP checks** — boots its **own** dev server on a spare port (**8614**, same command
+   shape as `just serve`) so it never fights a `just start` server on 8112, then asserts:
+   - `/index.html` 200 and non-empty
+   - `/aboutus.html` and `/contact.html` 200
+   - `/login.php` 200 and rendering the login form
+   - `/index.php` 200 (the output-test scratch page)
+
+DB-dependent pages (logging in, profiles, booking, admin, reports, receipts, password
+reset) are deliberately **not** tested: without MySQL on `localhost:3307` they return a
+`mysqli_sql_exception` body, so asserting on them would test the absence of a database,
+not the app. The full list and reasoning live in a comment at the top of
+`tests/smoke.ps1`.
+
+One `PASS`/`FAIL` line per check; exit code 1 if anything fails. The script always kills
+the server it started (a `finally` block scoped to this repo's path + port 8614).
 
 ## Troubleshooting
 
@@ -154,6 +177,7 @@ my-penawar/
   image/                  # logos, staff photos, background
   style.css               # shared stylesheet
   justfile, setup.ps1     # dev recipes + one-time machine setup
+  tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
   docs/images/            # README screenshots (home.png, login.png)
   .docs/                  # numbered documentation set
   .claude/                # skills, hooks, settings, memory

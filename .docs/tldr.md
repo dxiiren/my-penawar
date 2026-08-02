@@ -31,8 +31,9 @@ every SQL-running page prints a `mysqli_sql_exception`.
 
 ## [03-development/workflow.md](03-development/workflow.md)
 
-Edit the page file, refresh the browser (no build step), `just lint` before every
-commit — it's the repo's whole quality gate. Quote the four space-bearing filenames,
+Edit the page file, refresh the browser (no build step), `just lint` + `just test`
+(HTTP smoke suite over the no-DB pages, own port 8614) before every commit. Quote the
+four space-bearing filenames,
 never touch vendored `Mail/phpmailer/`, don't mute errors to hide legacy warnings, and
 never copy the interpolated-SQL / plaintext-password patterns into new code. Commits
 follow Conventional Commits via the `/commit` skill; PRs via `/create-pr`.
@@ -48,7 +49,8 @@ none of it exists today.
 
 The `just` recipe table: `start` (background server on 8112, self-stopping first),
 `serve` (foreground), `stop` (kills only this repo's `php.exe`), `lint` (`php -l`
-everything), plus `claudex`/`claudeo`/`claudeh` Claude Code launchers. PHP is pinned to
+everything), `test` (HTTP smoke suite over the no-DB pages, private server on 8614),
+plus `claudex`/`claudeo`/`claudeh` Claude Code launchers. PHP is pinned to
 `%LOCALAPPDATA%\Programs\php-8.4\php.exe`; `PORT` env var can override 8112 for a
 one-off.
 
@@ -70,5 +72,5 @@ port-8112 conflicts.
 
 Quick answers: why `/` isn't the home page, when you actually need the database, why
 port 3307, where test accounts live (seeded in the dump, plaintext), why duplicate
-login pages exist, why filenames have spaces, why PHPMailer stays untouched, and that
-`just lint` is the only automated gate.
+login pages exist, why filenames have spaces, why PHPMailer stays untouched, and what
+the automated gates cover (`just lint` syntax sweep + `just test` no-DB smoke suite).

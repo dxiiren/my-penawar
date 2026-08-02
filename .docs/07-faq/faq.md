@@ -48,8 +48,12 @@ flow (`recover_psw.php`) is the only consumer.
 
 ## Is there a test suite or CI?
 
-No. `just lint` (`php -l` on every file) is the entire automated gate, run locally.
-`06-troubleshooting` documents the runtime failure modes instead.
+No CI, but there is a local suite: `just test` runs `tests/smoke.ps1` — the `php -l`
+sweep plus HTTP checks of the pages that work without MySQL (home, about, contact, the
+login form, `index.php`) against a private server on port 8614. DB-backed pages are
+deliberately untested (no MySQL in the test loop — they'd only assert a
+`mysqli_sql_exception`). `just lint` remains available as the fast syntax-only gate;
+`06-troubleshooting` documents the runtime failure modes.
 
 ## Where do I ask an AI assistant for help?
 

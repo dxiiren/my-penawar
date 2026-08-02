@@ -40,11 +40,16 @@ stop:
 
 # ─── Quality ─────────────────────────────────────────────
 
-# The only automated quality gate this repo has (no composer, no test suite):
-# a parse error in any file breaks the page that includes it, so gate on all of them.
+# Fast syntax gate (no composer): a parse error in any file breaks the page that
+# includes it, so gate on all of them. `test` below runs this sweep plus HTTP checks.
 # Syntax-lint every PHP file with `php -l` (recurses; skips .git).
 lint: _require-php
     $fail = 0; Get-ChildItem -Path '{{justfile_directory()}}' -Filter *.php -Recurse -File | Where-Object { $_.FullName -notlike '*\.git\*' } | ForEach-Object { $out = & '{{php}}' -l $_.FullName 2>&1; if ($LASTEXITCODE -ne 0) { $fail++; Write-Host ($out -join "`n") -ForegroundColor Red } }; if ($fail -gt 0) { Write-Error "$fail PHP file(s) failed php -l"; exit 1 } else { Write-Host "All PHP files pass php -l" -ForegroundColor Green }
+
+# HTTP smoke-test suite (tests/smoke.ps1): lint gate + the no-DB pages against a private
+# server on port 8614 (so it never fights `just start`). DB-backed pages are out of scope.
+test: _require-php
+    powershell -NoProfile -ExecutionPolicy Bypass -File '{{justfile_directory()}}\tests\smoke.ps1'; exit $LASTEXITCODE
 
 # ─── Tools ───────────────────────────────────────────────
 
