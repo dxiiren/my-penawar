@@ -10,6 +10,19 @@ monthly reports, receipts, password recovery — are page-per-file PHP scripts u
 > **New developer? Start with [`.docs/tldr.md`](.docs/tldr.md)** — every doc summarised on one
 > page. The full guide lives in [`.docs/`](.docs/README.md).
 
+| Home (`index.html`) | Login (`login.php`) |
+| --- | --- |
+| ![Home page](docs/images/home.png) | ![Login page](docs/images/login.png) |
+
+## About this project
+
+MyPenawar was built in 2022 as a final-year university project and published to GitHub in
+2023. It is preserved here exactly as submitted — page-per-file raw PHP, string-built
+`mysqli` queries, plaintext seed passwords and all — as a snapshot of that stage, not as an
+example of current practice. For how the same developer writes PHP today, see the Laravel 12
+repos [job-portal](https://github.com/dxiiren/job-portal) and
+[book-review](https://github.com/dxiiren/book-review), which supersede these patterns.
+
 ## Prerequisites
 
 | Tool | Version | Installed by |
@@ -34,19 +47,41 @@ pwsh ./setup.ps1
 just start
 ```
 
-The app is now at **http://127.0.0.1:8112**. Stop it with `just stop`.
+The app is now at **http://127.0.0.1:8112**. Stop it with `just stop`. What works with
+and without a database is spelled out in [Demo / local access](#demo--local-access) below.
 
-Static pages and the login/registration forms render without a database. To make the
-DB-backed pages work, run MySQL/MariaDB on `localhost:3307` (XAMPP default in this
-project's era) and import the schema:
+## Demo / local access
+
+There is no hosted demo — the site runs locally via `just start`.
+
+**Works with no database at all:**
+
+- Home — <http://127.0.0.1:8112/index.html>
+- About us — `/aboutus.html` · Contact — `/contact.html` · Members — `/member.html`
+- Login/registration **form** — `/login.php` renders fully; submitting it needs the DB
+- Password-recovery form — `/recover_psw.php` (sending the mail needs the DB + SMTP)
+
+**Needs MySQL/MariaDB:** everything that touches data — logging in, patient/staff
+profiles, appointment booking and admin (`patient booking.php`, `patient.php`,
+`patientedit.php`, `code.php`), appointment history (`appList2.php`),
+`monthly report.php`, `receipt.php`, `get_data.php`, `reset_psw.php`. Without the DB
+these paths return HTTP 200 with a printed `mysqli_sql_exception` instead
+([why](#pages-that-touch-the-database-fail)).
+
+**MySQL setup** — must match what `db_config.php` expects: host `localhost`, port
+**3307**, database `mypenawar`, user `root`, **empty password**:
 
 ```powershell
 mysql -h 127.0.0.1 -P 3307 -u root -e "CREATE DATABASE IF NOT EXISTS mypenawar"
 mysql -h 127.0.0.1 -P 3307 -u root mypenawar < mypenawar.sql
 ```
 
-Connection settings live in `db_config.php` (`localhost:3307`, db `mypenawar`, user
-`root`, empty password).
+The dump (phpMyAdmin export, MariaDB 10.4) seeds all five tables — `booking`,
+`employee`, `patient`, `payment`, `service` — including ready-made staff and patient
+accounts, so you can log in and exercise the booking flow immediately after the import.
+The usernames/passwords are in the `employee` and `patient` INSERT rows of
+`mypenawar.sql` (plaintext seed data for a local demo DB — deliberately not repeated
+here).
 
 ## Commands
 
@@ -119,6 +154,7 @@ my-penawar/
   image/                  # logos, staff photos, background
   style.css               # shared stylesheet
   justfile, setup.ps1     # dev recipes + one-time machine setup
+  docs/images/            # README screenshots (home.png, login.png)
   .docs/                  # numbered documentation set
   .claude/                # skills, hooks, settings, memory
 ```
