@@ -1,72 +1,48 @@
 <?php session_start() ;
 include('db_config.php');
 ?>
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600" rel="stylesheet" type="text/css">
-
-    <link rel="stylesheet" href="style.css">
-
-    <link rel="icon" href="Favicon.png">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
-
-    <title>Login Form</title>
+<?php $pageTitle = 'Reset Password — Poliklinik Penawar'; include 'partials/head.php'; ?>
 </head>
-<body>
 
-<nav class="navbar navbar-expand-lg navbar-light navbar-laravel">
-    <div class="container">
-        <a class="navbar-brand" href="#">Password Reset Form</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</nav>
+<body class="bg-white font-sans text-slate-700 antialiased">
 
-<main class="login-form">
-    <div class="cotainer">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Reset Your Password</div>
-                    <div class="card-body">
-                        <form action="#" method="POST" name="login">
+<?php include 'partials/nav.php'; ?>
 
-                            <div class="form-group row">
-                                <label for="password" class="col-md-4 col-form-label text-md-right">New Password</label>
-                                <div class="col-md-6">
-                                    <input type="password" id="password" class="form-control" name="password" required autofocus>
-                                    <i class="bi bi-eye-slash" id="togglePassword"></i>
-                                </div>
-                            </div>
+<main class="bg-gradient-to-b from-teal-50/70 to-white">
+    <div class="mx-auto w-full max-w-md px-4 pb-8 pt-16 sm:px-6">
+        <div class="text-center">
+            <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-100 text-xl text-teal-700"><i class="fa-solid fa-lock"></i></span>
+            <h1 class="mt-5 text-3xl font-extrabold tracking-tight text-slate-900">Reset your password</h1>
+            <p class="mt-3 text-sm leading-6 text-slate-600">
+                Choose a new password for your account.
+            </p>
+        </div>
 
-                            <div class="col-md-6 offset-md-4">
-                                <input type="submit" value="Reset" name="reset">
-                            </div>
+        <div class="card mt-8 p-6 sm:p-8">
+            <form action="#" method="POST" name="login" class="space-y-5">
+                <div>
+                    <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700">New Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" class="field pr-11" name="password" required autofocus>
+                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-400 transition hover:text-teal-600" aria-label="Show password">
+                            <i class="fa-regular fa-eye-slash"></i>
+                        </button>
                     </div>
-                    </form>
                 </div>
-            </div>
+                <input type="submit" value="Reset" name="reset" class="btn-primary w-full cursor-pointer py-3">
+            </form>
+            <p class="mt-6 text-center">
+                <a href="login.php" class="text-sm font-semibold text-teal-700 transition hover:text-teal-800 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i> Back to login</a>
+            </p>
         </div>
     </div>
-    </div>
-
 </main>
+
+<?php include 'partials/footer.php'; ?>
 </body>
 </html>
 <?php
@@ -112,6 +88,8 @@ include('db_config.php');
         }else{
             password.type = 'password';
         }
-        this.classList.toggle('bi-eye');
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
     });
 </script>

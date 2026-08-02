@@ -1,138 +1,265 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-		<!-- icon stylesheet link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-	
-	<!-- link with css -->
-	<link rel="stylesheet" type="text/css" href="style.css">
-	
-	<!-- covers almost all of the characters and symbols in the world!-->
-    <meta charset="UTF-8">
-	
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	<script src="https://kit.fontawesome.com/c4254e24a8.js"></script>
-	
-    <title>Home</title>
-	
-	<style>
-		body{
-			background-image:linear-gradient(rgba(0,0,0,0.75),rgba(0,0,0,0.75)),url('image/background.jpg');
-			background-size: cover;
-			background-position: center;
-			color:white;
-	
-			}
-			
-	</style>
-	
+  <!-- Shared head markup — keep in sync with partials/head.php (static pages cannot use PHP includes) -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poliklinik Penawar — Home</title>
+  <link rel="icon" type="image/png" href="image/2.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <style type="text/tailwindcss">
+    .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2; }
+    .btn-outline { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-teal-400 hover:text-teal-700; }
+    .card { @apply rounded-2xl border border-slate-200 bg-white shadow-sm; }
+    .eyebrow { @apply text-xs font-bold uppercase tracking-[0.2em] text-teal-600; }
+  </style>
 </head>
 
-<body>
-	<div class="navbar">
-		<img src="image/2.png" class="logo">
-		<ul>
-			<li><a href="#">Home</a></li>
-			<li><a href="#">Profile</a></li>
-			<li><a href="aboutus.html">About Us</a></li>
-			<li><a href="contact.html">Contact Us</a></li>
-			<li><a href="member.html">Our Member</a></li>
-		</ul>
-	</div>
-	
-	<div id="pagecontainer">
-	<div id="pagewrap">
-	
-	<div class="contentStart">
-		<h1><span class="auto-typed"></span></h1>
-		<p> Feel free to browse our website to get more information and detail about us,
-		<br>Don't forget to login to book your appointment ;0 </p>
-		
-		<div class="contentStart2">
-			<a href="login.php"> <button type="button"><span></span>LOGIN</button> </a>
-			<a href="login.php"> <button type="button"><span></span>REGISTER</button></a>
-		</div>
-		
-	</div>
-	</div>
-	
-	<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-	
-	<script>
-		var typed = new Typed(".auto-typed", {
-		
-			strings: ["WELCOME TO POLIKLINIK PENAWAR" , "The best poliklinik in Peninsular Malaysia" , " 'Keeping you to a better life' "],
-			typeSpeed: 90,
-			backSpeed: 60,
-			loop:true
-		});
-		
-	</script>
-	
-	
-	
-	<footer>
-		
-		<div class="rowindex">
-			<div class="columnindex">
-				<img src="image/2.png" class="logo">
-				<p>
-					The polyclinic provided services such as regular medical check-ups, as well as mental health services. 
-					Contribute to the care of patients suffering from behavioural issues — especially those from low 
-					socio-economic backgrounds.
-				</p>
-			</div>
-			
-			<div class="columnindex">
-				<h3> Office <div class="under"><span></span></div> </h3>
-				<p>No 28G, Jalan Semenyih Sentral 4,</p> 
-				<p>Taman Semenyih Sentral, </p>
-				<p>43500 Semenyih, Selangor</p>
-				<p>Malaysia</p>
-				<p class="email-id">poliklinikpenawar@gmail.com</p>
-				<h4> +60 - 31234567 </h4>
-			</div>
-			
-			<div class="columnindex">
-				<div class="linkfooter">
-					<h3>Links <div class="under"><span></span></div> <h3/>
-					<ul>
-						<li><a href="#">Home</a></li>
-						<li><a href="#">Profile</a></li>
-						<li><a href="aboutus.html">About Us</a></li>
-						<li><a href="contact.html">Contact Us</a></li>
-						<li><a href="member.html">Our Member</a></li>
-					</ul>
-				</div>
-			</div>
-			
-			<div class="columnindex">
-				<h3>Newsletter <div class="under"><span></span></div>  </h3>
-				<form>
-					<i class="fa-regular fa-envelope"></i>
-					<input type="email" placeholder=" enter your email id" required>
-					<button type="submit"><i class="fa-solid fa-arrow-right"></i></button>
-				</form>
-				
-				<div class="social-icons">
-					<i class="fa-brands fa-facebook"></i>
-					<i class="fa-brands fa-instagram"></i>
-					<i class="fa-brands fa-twitter"></i>
-					<i class="fa-brands fa-linkedin"></i>
-				</div>
-				
-			</div>
-			
-			
-			</div>
-			
-			<hr>
-			<p class="copyright"> MyPenawar Sdn Bhd &copy; 2022 - All Rights Reserved</p>
-		
-		</footer>
-	</div>
-	
+<body class="bg-white font-sans text-slate-700 antialiased">
+
+  <!-- Shared nav markup — keep in sync with partials/nav.php -->
+  <header class="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <a href="index.html" class="flex shrink-0 items-center" aria-label="MyPenawar home">
+        <img src="image/2.png" alt="MyPenawar — your best health consultant" class="h-10 w-auto">
+      </a>
+      <nav class="hidden items-center gap-1 md:flex" aria-label="Main navigation">
+        <a href="index.html" class="rounded-lg bg-teal-50 px-3 py-2 text-sm font-medium text-teal-700">Home</a>
+        <a href="aboutus.html" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">About Us</a>
+        <a href="contact.html" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">Contact</a>
+        <a href="member.html" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">Our Team</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="login.php" class="btn-primary hidden sm:inline-flex"><i class="fa-regular fa-calendar-check"></i> Book Appointment</a>
+        <button type="button" id="navToggle" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 text-slate-600 md:hidden" aria-label="Toggle menu" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+    <nav id="navMobile" class="hidden border-t border-slate-200 bg-white px-4 py-3 md:hidden" aria-label="Mobile navigation">
+      <a href="index.html" class="block rounded-lg bg-teal-50 px-3 py-2 text-sm font-medium text-teal-700">Home</a>
+      <a href="aboutus.html" class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">About Us</a>
+      <a href="contact.html" class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Contact</a>
+      <a href="member.html" class="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Our Team</a>
+      <a href="login.php" class="btn-primary mt-2 w-full"><i class="fa-regular fa-calendar-check"></i> Book Appointment</a>
+    </nav>
+  </header>
+  <script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+      var menu = document.getElementById('navMobile');
+      var open = menu.classList.toggle('hidden') === false;
+      this.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  </script>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden bg-gradient-to-b from-teal-50/70 via-white to-white">
+    <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-2 lg:pt-24">
+      <div>
+        <p class="eyebrow">Poliklinik Penawar &middot; Semenyih, Selangor</p>
+        <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+          Compassionate care for <span class="text-teal-600">every stage of life</span>
+        </h1>
+        <p class="mt-4 h-7 text-lg font-semibold text-teal-700"><span class="auto-typed"></span></p>
+        <p class="mt-4 max-w-xl text-base leading-7 text-slate-600">
+          From regular medical check-ups to mental-health support, our doctors are here for you
+          seven days a week. Browse our services, then log in to book your appointment online.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="login.php" class="btn-primary px-6 py-3"><i class="fa-regular fa-calendar-check"></i> Book an Appointment</a>
+          <a href="#services" class="btn-outline px-6 py-3"><i class="fa-solid fa-stethoscope"></i> Explore Services</a>
+        </div>
+        <div class="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-slate-200 pt-8">
+          <div>
+            <p class="text-2xl font-extrabold text-slate-900">10+</p>
+            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">Clinical services</p>
+          </div>
+          <div>
+            <p class="text-2xl font-extrabold text-slate-900">5</p>
+            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">Doctors on duty</p>
+          </div>
+          <div>
+            <p class="text-2xl font-extrabold text-slate-900">7<span class="text-teal-600">/</span>wk</p>
+            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">Days open</p>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <img src="image/background.jpg" alt="Treatment rooms at Poliklinik Penawar" class="w-full rounded-3xl object-cover shadow-xl ring-1 ring-slate-900/10" style="aspect-ratio: 4 / 3;">
+        <div class="absolute -bottom-6 left-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-5 py-4 shadow-lg backdrop-blur">
+          <span class="flex h-11 w-11 items-center justify-center rounded-full bg-teal-100 text-teal-700"><i class="fa-regular fa-clock"></i></span>
+          <div>
+            <p class="text-sm font-bold text-slate-900">Open today</p>
+            <p class="text-xs text-slate-500">9:00 AM &ndash; 11:00 PM</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services" class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <div class="mx-auto max-w-2xl text-center">
+      <p class="eyebrow">What we offer</p>
+      <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">Care under one roof</h2>
+      <p class="mt-4 text-base leading-7 text-slate-600">
+        A one-stop specialists' centre with personalised patient care and a fully
+        computerised clinic system.
+      </p>
+    </div>
+    <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="card p-6 transition hover:-translate-y-1 hover:shadow-md">
+        <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-lg text-teal-700"><i class="fa-solid fa-stethoscope"></i></span>
+        <h3 class="mt-4 text-lg font-bold text-slate-900">Medical Check-Ups</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Routine health screening and consultations to keep you and your family well.</p>
+      </div>
+      <div class="card p-6 transition hover:-translate-y-1 hover:shadow-md">
+        <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-lg text-teal-700"><i class="fa-solid fa-vials"></i></span>
+        <h3 class="mt-4 text-lg font-bold text-slate-900">Laboratory Testing</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">On-site lab work with fast, reliable results for informed diagnosis.</p>
+      </div>
+      <div class="card p-6 transition hover:-translate-y-1 hover:shadow-md">
+        <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-lg text-teal-700"><i class="fa-solid fa-hand-holding-heart"></i></span>
+        <h3 class="mt-4 text-lg font-bold text-slate-900">Screening &amp; Treatment</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Early detection and treatment of common illnesses and minor symptoms.</p>
+      </div>
+      <div class="card p-6 transition hover:-translate-y-1 hover:shadow-md">
+        <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-lg text-teal-700"><i class="fa-solid fa-person-breastfeeding"></i></span>
+        <h3 class="mt-4 text-lg font-bold text-slate-900">Prenatal &amp; Postnatal Care</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Women's reproductive health, menstrual hygiene advocacy and paediatric care.</p>
+      </div>
+      <div class="card p-6 transition hover:-translate-y-1 hover:shadow-md">
+        <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-lg text-teal-700"><i class="fa-solid fa-kit-medical"></i></span>
+        <h3 class="mt-4 text-lg font-bold text-slate-900">Minor Surgery &amp; Injury</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Minor surgical procedures and injury care handled by experienced clinicians.</p>
+      </div>
+      <div class="card p-6 transition hover:-translate-y-1 hover:shadow-md">
+        <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-lg text-teal-700"><i class="fa-solid fa-syringe"></i></span>
+        <h3 class="mt-4 text-lg font-bold text-slate-900">Vaccination</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Immunisation programmes for children and adults, on schedule and on record.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About preview -->
+  <section class="bg-slate-50">
+    <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2">
+      <div class="order-2 lg:order-1">
+        <img src="image/logo.jpg" alt="Poliklinik Penawar" class="w-full rounded-3xl object-cover shadow-lg ring-1 ring-slate-900/10" style="aspect-ratio: 4 / 3;">
+      </div>
+      <div class="order-1 lg:order-2">
+        <p class="eyebrow">About the clinic</p>
+        <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">Serving a better hospice</h2>
+        <p class="mt-4 text-base leading-7 text-slate-600">
+          Owned by Kumpulan Perubatan Penawar Sdn. Bhd. and founded by Dr. Rushmini Maris Ismail,
+          Poliklinik Penawar contributes to the care of patients suffering from behavioural
+          issues &mdash; especially those from low socio-economic backgrounds.
+        </p>
+        <ul class="mt-6 space-y-3 text-sm text-slate-700">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-0.5 text-teal-600"></i> One-stop specialists' centre with personalised patient care</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-0.5 text-teal-600"></i> Mental-health services and community outreach</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-0.5 text-teal-600"></i> Nutritional and dietary planning</li>
+        </ul>
+        <a href="aboutus.html" class="btn-outline mt-8"><i class="fa-solid fa-arrow-right"></i> Learn more about us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA band -->
+  <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <div class="overflow-hidden rounded-3xl bg-teal-700 px-6 py-14 text-center shadow-lg sm:px-14">
+      <h2 class="text-3xl font-extrabold tracking-tight text-white">Ready to see a doctor?</h2>
+      <p class="mx-auto mt-3 max-w-xl text-base leading-7 text-teal-100">
+        Register as a patient, pick a morning, afternoon or evening slot, and we'll take care of the rest.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a href="login.php" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-teal-700 shadow-sm transition hover:bg-teal-50"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+        <a href="login.php" class="inline-flex items-center justify-center gap-2 rounded-lg border border-teal-300/60 px-6 py-3 text-sm font-semibold text-white transition hover:bg-teal-600"><i class="fa-solid fa-user-plus"></i> Register</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shared footer markup — keep in sync with partials/footer.php -->
+  <footer class="mt-4 bg-slate-900 text-slate-300">
+    <div class="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <p class="text-xl font-extrabold tracking-tight text-white">MyPenawar</p>
+        <p class="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-teal-400">Your best health consultant</p>
+        <p class="mt-4 text-sm leading-6 text-slate-400">
+          Regular medical check-ups, mental-health support and community care —
+          especially for patients from low socio-economic backgrounds.
+        </p>
+      </div>
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Visit Us</h3>
+        <address class="mt-4 space-y-1 text-sm not-italic leading-6 text-slate-400">
+          <p>No 28G, Jalan Semenyih Sentral 4,</p>
+          <p>Taman Semenyih Sentral,</p>
+          <p>43500 Semenyih, Selangor, Malaysia</p>
+          <p class="pt-2"><i class="fa-regular fa-envelope mr-2 text-teal-400"></i>poliklinikpenawar@gmail.com</p>
+          <p><i class="fa-solid fa-phone mr-2 text-teal-400"></i>+60 3-1234 567</p>
+        </address>
+      </div>
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Quick Links</h3>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="index.html" class="text-slate-400 transition hover:text-teal-400">Home</a></li>
+          <li><a href="aboutus.html" class="text-slate-400 transition hover:text-teal-400">About Us</a></li>
+          <li><a href="contact.html" class="text-slate-400 transition hover:text-teal-400">Contact Us</a></li>
+          <li><a href="member.html" class="text-slate-400 transition hover:text-teal-400">Our Team</a></li>
+          <li><a href="login.php" class="text-slate-400 transition hover:text-teal-400">Book an Appointment</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-white">Opening Hours</h3>
+        <ul class="mt-4 space-y-2 text-sm text-slate-400">
+          <li class="flex justify-between gap-4"><span>Morning</span><span>9:00 AM – 12:00 PM</span></li>
+          <li class="flex justify-between gap-4"><span>Afternoon</span><span>12:00 PM – 5:00 PM</span></li>
+          <li class="flex justify-between gap-4"><span>Evening</span><span>5:00 PM – 11:00 PM</span></li>
+          <li class="pt-1 text-teal-400">Open 7 days a week</li>
+        </ul>
+        <div class="mt-5 flex gap-3">
+          <a href="#" class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-slate-300 transition hover:bg-teal-600 hover:text-white" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-slate-300 transition hover:bg-teal-600 hover:text-white" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-slate-300 transition hover:bg-teal-600 hover:text-white" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
+          <a href="#" class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-slate-300 transition hover:bg-teal-600 hover:text-white" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-slate-800">
+      <p class="mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate-500 sm:px-6">MyPenawar Sdn Bhd &copy; 2022 &mdash; All Rights Reserved</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+  <script>
+    new Typed(".auto-typed", {
+      strings: [
+        "Welcome to Poliklinik Penawar",
+        "The best poliklinik in Peninsular Malaysia",
+        "&ldquo;Keeping you to a better life&rdquo;"
+      ],
+      typeSpeed: 60,
+      backSpeed: 30,
+      backDelay: 1600,
+      loop: true
+    });
+  </script>
+
 </body>
 
 </html>

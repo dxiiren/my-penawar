@@ -1,72 +1,45 @@
 <?php session_start() ?>
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600" rel="stylesheet" type="text/css">
-
-    <link rel="stylesheet" href="style.css">
-
-    <link rel="icon" href="Favicon.png">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-
-    <title>Login Form</title>
+<?php $pageTitle = 'Password Recovery — Poliklinik Penawar'; include 'partials/head.php'; ?>
 </head>
-<body>
 
-<nav class="navbar navbar-expand-lg navbar-light navbar-laravel">
-    <div class="container">
-        <a class="navbar-brand" href="#">User Password Recover</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<body class="bg-white font-sans text-slate-700 antialiased">
 
-    </div>
-</nav>
+<?php include 'partials/nav.php'; ?>
 
-<main class="login-form">
-    <div class="cotainer">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Password Recover</div>
-                    <div class="card-body">
-                        <form action="#" method="POST" name="recover_psw">
-                            <div class="form-group row">
-                                <label for="email_address" class="col-md-4 col-form-label text-md-right">E-Mail Address</label>
-                                <div class="col-md-6">
-                                    <input type="text" id="email_address" class="form-control" name="email" required autofocus>
-                                </div>
-                            </div>
+<main class="bg-gradient-to-b from-teal-50/70 to-white">
+    <div class="mx-auto w-full max-w-md px-4 pb-8 pt-16 sm:px-6">
+        <div class="text-center">
+            <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-100 text-xl text-teal-700"><i class="fa-solid fa-key"></i></span>
+            <h1 class="mt-5 text-3xl font-extrabold tracking-tight text-slate-900">Recover your password</h1>
+            <p class="mt-3 text-sm leading-6 text-slate-600">
+                Enter the email address on your patient account and we'll send you a reset link.
+            </p>
+        </div>
 
-                            <div class="col-md-6 offset-md-4">
-                                <input type="submit" value="Recover" name="recover">
-                            </div>
-                    </div>
-                    </form>
+        <div class="card mt-8 p-6 sm:p-8">
+            <form action="#" method="POST" name="recover_psw" class="space-y-5">
+                <div>
+                    <label for="email_address" class="mb-1.5 block text-sm font-semibold text-slate-700">E-Mail Address</label>
+                    <input type="text" id="email_address" class="field" name="email" placeholder="you@example.com" required autofocus>
                 </div>
-            </div>
+                <input type="submit" value="Recover" name="recover" class="btn-primary w-full cursor-pointer py-3">
+            </form>
+            <p class="mt-6 text-center">
+                <a href="login.php" class="text-sm font-semibold text-teal-700 transition hover:text-teal-800 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i> Back to login</a>
+            </p>
         </div>
     </div>
-    </div>
-
 </main>
+
+<?php include 'partials/footer.php'; ?>
 </body>
 </html>
 
-<?php 
+<?php
     if(isset($_POST["recover"])){
         include('db_config.php');
         $email = $_POST["email"];
@@ -83,7 +56,7 @@
 
            <?php
         }else{
-            // generate token by binaryhexa 
+            // generate token by binaryhexa
             $token = bin2hex(random_bytes(50));
 
             //session_start ();

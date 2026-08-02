@@ -1,268 +1,128 @@
 <?php
 	session_start();
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-		<!-- icon stylesheet link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-	
-	<!-- link with css -->
-	<link rel="stylesheet" type="text/css" href="style.css">
-	
-	<!-- covers almost all of the characters and symbols in the world!-->
-    <meta charset="UTF-8">
-	
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Register</title>
-	
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
-	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<!------ Include the above in your HEAD tag ---------->
-	
-	<style>
-      * {
-        box-sizing: border-box;
-      }
-      .openBtn {
-        display: flex;
-        justify-content: left;
-      }
-      .openButton {
-        background-color: #fff;
-        color: red;
-		
-		width: 85%; 
-		padding: 10px 30px; 
-		cursor: pointer; 
-		display: block; 
-		margin: auto; 
-		border: 0; 
-		outline: none; 
-		border-radius: 30px;
-      }
-      .loginPopup {
-        position: relative;
-        text-align: center;
-        width: 100%;
-      }
-      .formPopup {
-        display: none;
-        position: fixed;
-        left: 50%;
-        top: 12%;
-        transform: translate(-50%, 5%);
-        border: 3px solid #999999;
-        z-index: 9;
-      }
-      .formContainer {
-        max-width: 300px;
-        padding: 40px;
-        background-color: #fff;
-      }
-      .formContainer input[type=text],
-      .formContainer input[type=password] {
-        width: 100%;
-        padding: 15px;
-        margin: 5px 0 20px 0;
-        border: none;
-        background: #eee;
-      }
-      .formContainer input[type=text]:focus,
-      .formContainer input[type=password]:focus {
-        background-color: #ddd;
-        outline: none;
-      }
-      .formContainer .btn {
-        padding: 12px 20px;
-        border: none;
-        background-color: #8ebf42;
-        color: #fff;
-        cursor: pointer;
-        width: 100%;
-        margin-bottom: 15px;
-        opacity: 0.8;
-      }
-      .formContainer .cancel {
-        background-color: #cc0000;
-      }
-      .formContainer .btn:hover,
-      .openButton:hover {
-        opacity: 1;
-      }
-    </style>
-	
+<?php $pageTitle = 'Login | Register — Poliklinik Penawar'; include 'partials/head.php'; ?>
 </head>
 
-<body>
-	<div class="navbar">
-		<img src="image/2.png" class="logo">
-		<ul>
-			<li><a href="index.html">Home</a></li>
-			<li><a href="#">Profile</a></li>
-			<li><a href="aboutus.html">About Us</a></li>
-			<li><a href="contact.html">Contact Us</a></li>
-			<li><a href="member.html">Our Member</a></li>
-		</ul>
-	</div>
-	
-	<div id="pagecontainer">
-	<div id="pagewrap">
-	<div class="contentLogin">
-			<div class="form-box">
-				<div class="button-box">
-					<div id="btn"></div>
-					<button type="button" class="toggle-btn" onclick="login()" >Log In</button>
-					<button type="button" class="toggle-btn" onclick="register()" >Register</button>
-				</div>
-			
-				
-				<form  id="login" class="input-group" method="post"> 
-					<input type="text" name="id" class="input-field" placeholder="Username" required> 
-					<input type="password" name="pass" class="input-field" placeholder="Enter Password" required> <br><br>
-					
-					<input type="radio" name="user" value="patient"> Patient &nbsp;
-					<input type="radio" name="user" value="staff"> Staff
+<body class="bg-white font-sans text-slate-700 antialiased">
 
-					<br><br><br>
-					<button type="submit" name="login" class="submit-btn">Log in</button>
-					<br>
-					<div class="openBtn">
-						<a href="recover_psw.php" class="openButton"> Forgot Your Password?</a>
+<?php include 'partials/nav.php'; ?>
+
+	<section class="bg-gradient-to-b from-teal-50/70 to-white">
+		<div class="mx-auto w-full max-w-lg px-4 pb-8 pt-16 sm:px-6">
+			<div class="text-center">
+				<p class="eyebrow">Patient &amp; staff portal</p>
+				<h1 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">Welcome to MyPenawar</h1>
+				<p class="mt-3 text-sm leading-6 text-slate-600">Log in to manage your appointments, or register as a new patient.</p>
+			</div>
+
+			<div class="card mt-8 p-6 sm:p-8">
+				<!-- Tab switcher -->
+				<div class="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1" role="tablist">
+					<button type="button" id="tabLogin" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm" onclick="showLogin()" role="tab" aria-selected="true">Log In</button>
+					<button type="button" id="tabRegister" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700" onclick="showRegister()" role="tab" aria-selected="false">Register</button>
+				</div>
+
+				<!-- Login form (ids/names are load-bearing: smoke tests pin id="login") -->
+				<form id="login" class="mt-6 space-y-5" method="post">
+					<div>
+						<label class="mb-1.5 block text-sm font-semibold text-slate-700">Username</label>
+						<input type="text" name="id" class="field" placeholder="Your username" required>
 					</div>
+					<div>
+						<label class="mb-1.5 block text-sm font-semibold text-slate-700">Password</label>
+						<input type="password" name="pass" class="field" placeholder="Enter password" required>
+					</div>
+					<fieldset>
+						<legend class="mb-2 text-sm font-semibold text-slate-700">I am a</legend>
+						<div class="grid grid-cols-2 gap-3">
+							<label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50 has-[:checked]:text-teal-800">
+								<input type="radio" name="user" value="patient" class="accent-teal-600"> Patient
+							</label>
+							<label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50 has-[:checked]:text-teal-800">
+								<input type="radio" name="user" value="staff" class="accent-teal-600"> Staff
+							</label>
+						</div>
+					</fieldset>
+					<button type="submit" name="login" class="btn-primary w-full py-3"><i class="fa-solid fa-right-to-bracket"></i> Log in</button>
+					<p class="text-center">
+						<a href="recover_psw.php" class="text-sm font-semibold text-teal-700 transition hover:text-teal-800 hover:underline">Forgot your password?</a>
+					</p>
 				</form>
-				
-				<form id="register" class="input-group" method="post"> 
-				
-				
-					<p>Account Information :</p>
-					<input type="text" class="input-field" name="user" placeholder="Username" >
-					<input type="password" class="input-field" name="pw" placeholder="Password" > 
-				
-					<br><br><br>
-				
-					<p>Account Information :</p>
-					<input type="text" class="input-field" name="name" placeholder="Full Name" > 
-					<input type="text" class="input-field" name="ic" placeholder="IC Number" > 
-					
-					
-					<input type="date" class="input-field" name="birth" placeholder="Birthdate" >
-					<input type="number" class="input-field" name="age" placeholder="Age" >
-					
-					<input type="email" class="input-field" name="email" placeholder="Email" > 
-					<input type="text" class="input-field" name="phone" placeholder="Phone Num" > 
-					<br><br>
-					<textarea name="add" id="message" cols="28" rows="1" placeholder="Enter yout address here . . . "></textarea>
-					<br><br>
-				
-					<button type="submit" name="register" class="reg-btn">Register</button> 
-				</form>
-				
-		</div>
 
-					
-			
-	</div>
-	
-	</div>
-	
-	<footer>
-		<div class="rowindex">
-			<div class="columnindex">
-				<img src="image/2.png" class="logo">
-				<p>
-					The polyclinic provided services such as regular medical check-ups, as well as mental health services. 
-					Contribute to the care of patients suffering from behavioural issues — especially those from low 
-					socio-economic backgrounds.
-				</p>
-			</div>
-			
-			<div class="columnindex">
-				<h3> Office <div class="under"><span></span></div> </h3>
-				<p>No 28G, Jalan Semenyih Sentral 4,</p> 
-				<p>Taman Semenyih Sentral, </p>
-				<p>43500 Semenyih, Selangor</p>
-				<p>Malaysia</p>
-				<p class="email-id">poliklinikpenawar@gmail.com</p>
-				<h4> +60 - 31234567 </h4>
-			</div>
-			
-			<div class="columnindex">
-				<div class="linkfooter">
-				<h3>Links <div class="under"><span></span></div> </h3>
-					<ul>
-						<li><a href="index.html">Home</a></li>
-						<li><a href="#">Profile</a></li>
-						<li><a href="aboutus.html">About Us</a></li>
-						<li><a href="contact.html">Contact Us</a></li>
-						<li><a href="member.html">Our Member</a></li>
-					</ul>
-				</div>
-			</div>
-			
-			<div class="columnindex">
-				<h3>Newsletter <div class="under"><span></span></div>  </h3>
-				<form>
-					<i class="fa-regular fa-envelope"></i>
-					<input type="email" placeholder=" enter your email id" required>
-					<button type="submit"><i class="fa-solid fa-arrow-right"></i></button>
+				<!-- Registration form -->
+				<form id="register" class="mt-6 hidden space-y-5" method="post">
+					<div>
+						<h2 class="text-sm font-bold uppercase tracking-wider text-teal-700">Account information</h2>
+						<div class="mt-3 space-y-4">
+							<input type="text" class="field" name="user" placeholder="Username">
+							<input type="password" class="field" name="pw" placeholder="Password">
+						</div>
+					</div>
+					<div>
+						<h2 class="text-sm font-bold uppercase tracking-wider text-teal-700">Personal details</h2>
+						<div class="mt-3 grid gap-4 sm:grid-cols-2">
+							<input type="text" class="field sm:col-span-2" name="name" placeholder="Full name">
+							<input type="text" class="field" name="ic" placeholder="IC number">
+							<input type="number" class="field" name="age" placeholder="Age">
+							<div class="sm:col-span-2">
+								<label class="mb-1.5 block text-xs font-semibold text-slate-500">Birth date</label>
+								<input type="date" class="field" name="birth">
+							</div>
+							<input type="email" class="field" name="email" placeholder="Email">
+							<input type="text" class="field" name="phone" placeholder="Phone number">
+							<textarea name="add" id="message" rows="2" class="field sm:col-span-2" placeholder="Enter your address here . . ."></textarea>
+						</div>
+					</div>
+					<button type="submit" name="register" class="btn-primary w-full py-3"><i class="fa-solid fa-user-plus"></i> Register</button>
 				</form>
-				
-				<div class="social-icons">
-					<i class="fa-brands fa-facebook"></i>
-					<i class="fa-brands fa-instagram"></i>
-					<i class="fa-brands fa-twitter"></i>
-					<i class="fa-brands fa-linkedin"></i>
-				</div>
-				
 			</div>
 		</div>
-			
-			<hr>
-			<p class="copyright"> MyPenawar Sdn Bhd &copy; 2022 - All Rights Reserved</p>
-		
-		</footer>
-	
-	</div>
-	
-	
+	</section>
+
+<?php include 'partials/footer.php'; ?>
+
 	<script>
-		var x = document.getElementById("login");
-		var y = document.getElementById("register");
-		var z = document.getElementById("btn");
-	
-		function register(){
-			x.style.left ="-400px";
-			y.style.left ="50px";
-			z.style.left ="110px";
+		var loginForm = document.getElementById("login");
+		var registerForm = document.getElementById("register");
+		var tabLogin = document.getElementById("tabLogin");
+		var tabRegister = document.getElementById("tabRegister");
+
+		function setTab(activeTab, inactiveTab) {
+			activeTab.className = "rounded-lg bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm";
+			activeTab.setAttribute("aria-selected", "true");
+			inactiveTab.className = "rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700";
+			inactiveTab.setAttribute("aria-selected", "false");
 		}
-		
-		function login(){
-			x.style.left ="50px";
-			y.style.left ="450px";
-			z.style.left ="0px";
+
+		function showLogin() {
+			loginForm.classList.remove("hidden");
+			registerForm.classList.add("hidden");
+			setTab(tabLogin, tabRegister);
 		}
-		
-		 function openForm() {
-        document.getElementById("popupForm").style.display = "block";
-      }
-      function closeForm() {
-        document.getElementById("popupForm").style.display = "none";
-      }
+
+		function showRegister() {
+			registerForm.classList.remove("hidden");
+			loginForm.classList.add("hidden");
+			setTab(tabRegister, tabLogin);
+		}
 	</script>
-	
+
 	<?php
-	
+
 		//connection
 			$hostname = "localhost:3307";
 			$username = "root";
 			$password = "";
 			$dbname = "mypenawar";
-			
+
 			//Create Connection
 			$connect = mysqli_connect($hostname, $username, $password, $dbname) OR DIE("Connection Failed");
-			
+
 			//login
 				if(isset($_POST["login"]))
 				{
@@ -270,18 +130,18 @@
 					$_SESSION["user1"] = $_POST["id"];
 					$pass = $_POST["pass"];
 					$user = $_POST["user"];
-					
+
 					//write sql
-					
+
 					if($user=="patient")
-					{	
+					{
 						$sql= "SELECT *
-							   FROM patient 
+							   FROM patient
 							   WHERE patientUser = '$id' AND patientPassword='$pass'
 							   ";
-							   
+
 						$sendsql = mysqli_query($connect,$sql);
-						
+
 						if($sendsql)
 						{
 							if(mysqli_num_rows($sendsql)>0)
@@ -293,26 +153,26 @@
 							{
 								echo "<script>alert('Unsuceessfully Login  !');</script> " ;
 								echo '<meta http-equiv="refresh" content="0; URL=login.php">';
-							}	
+							}
 						}
 						else
 							echo "Query Failed!";
 					}//patient
-					
+
 					else if ($user=="staff")
 					{
 						$sql= "SELECT *
 							   FROM employee
 							   WHERE empID = '$id' AND empPassword='$pass'
 							   ";
-							   
+
 						$sendsql = mysqli_query($connect,$sql);
-						
+
 						if($sendsql)
 						{
 							if(mysqli_num_rows($sendsql)>0)
 							{
-								
+
 								echo "<script>alert('Welcome $id!');</script> " ;
 								echo '<meta http-equiv="refresh" content="0; URL=employee profile.php">';
 							}
@@ -321,17 +181,17 @@
 								echo "<script>alert('Unsuceessfully Login  !');</script> " ;
 								echo '<meta http-equiv="refresh" content="0; URL=login.php">';
 							}
-								
+
 						}
 						else
 							echo "Query Failed!";
 						}
 				}
-		            
+
 			//register
 				if(isset($_POST["register"]))
 				{
-					$name = $_POST["name"]; 
+					$name = $_POST["name"];
 					$ic = $_POST["ic"];
 					$age = $_POST["age"];
 					$birth = $_POST["birth"];
@@ -342,20 +202,20 @@
 					$address = $_POST["add"];
 
 					//write sql
-	
+
 						//check whether acc have been created or not
 						$sql= "SELECT *
-							   FROM patient 
+							   FROM patient
 							   WHERE patientIC = '$ic'
 							   ";
-							   
+
 						$sendsql = mysqli_query($connect,$sql);
-						
+
 						if($sendsql)
 						{
 							if(mysqli_num_rows($sendsql)>0)
 							{
-								
+
 								echo "<script>alert('Account with that username or IC have been existed! Please Login using your username and passwword ');</script> " ;
 								echo '<meta http-equiv="refresh" content="0; URL=login.php">';
 							}
@@ -363,9 +223,9 @@
 							{
 								$sql2= "INSERT INTO patient( patientName, patientIC, patientBirthDate, patientUser, patientPassword, patientEmail, patientPhoneNum, patientAddress )
 										VALUES  ('$name', '$ic' , '$birth', '$user', '$pw', '$email', '$phone' , '$address' )";
-										
+
 								$sendsql2 = mysqli_query($connect,$sql2);
-					
+
 								if($sendsql2)
 								{
 									echo "<script>alert('Your detail has been successfully registered. Thank you!');</script> " ;
@@ -373,52 +233,17 @@
 								}
 								else
 									echo "<script>alert('Query Failed!');</script> " ;
-							}	
+							}
 						}
 						else
 							echo "Query Failed!";
-						   
-						
-					
-					
+
+
+
+
 				}
-				
+
 		?>
-		
-<script src="https://smtpjs.com/v3/smtp.js"> </script>
-
-<script>
-    const form = document.querySelector(".formContainer");
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-	let email = document.querySelector(".email1").value;
-    let password = document.querySelector(".pw1").value;
-  
-
-
-    document.querySelector(".formContainer").reset();
-
-    sendEmail(email, password);
-  })
-  function sendEmail(email, password){
-    Email.send({
-        
-      Host: "smtp.elasticemail.com", 
-      Username: "2020479526@student.uitm.edu.my",
-      Password: "REPLACE_WITH_YOUR_ELASTICEMAIL_API_KEY",
-      To: "mohdakmal875@gmail.com",
-      From: "2020479526@student.uitm.edu.my",
-      Subject: `${email} Just messaged you from the website form`,
-      Body: `Email: ${email} <br> New Password: ${password} <br>`,
-    }).then((success) => {
-     
-      alert("message sent successfully. Please check the spam folder in your mail.");
-    }).catch((error) => {
-        
-      alert("error sending message");
-    })
-  }
-</script>	
 </body>
 
 </html>
