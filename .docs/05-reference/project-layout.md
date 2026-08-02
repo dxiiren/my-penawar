@@ -37,7 +37,7 @@ my-penawar/
   image/                  # logos, staff photos, background
   style.css               # legacy 2022 stylesheet — used only by the dead variants now
   justfile                # dev recipes (start/serve/stop/lint/test + claude launchers)
-  tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
+  tests/                  # smoke.ps1 — 20-check suite (`just test`); starts MariaDB itself, DB flows are mandatory
   setup.ps1               # one-time machine setup (idempotent)
   README.md               # entry point + quick start
   CLAUDE.md               # AI-assistant briefing (stack, rules, gotchas)

@@ -127,7 +127,10 @@
 				if(isset($_POST["login"]))
 				{
 					$id = $_POST["id"];
-					$_SESSION["user1"] = $_POST["id"];
+					// NOTE: $_SESSION["user1"] is set only after the credentials
+					// verify (below). Setting it here handed every rejected login a
+					// session that satisfied the portal guards in
+					// patient profile.php / employee profile.php / appList2.php.
 					$pass = $_POST["pass"];
 					$user = $_POST["user"];
 
@@ -146,6 +149,7 @@
 						{
 							if(mysqli_num_rows($sendsql)>0)
 							{
+								$_SESSION["user1"] = $id;
 								echo "<script>alert('Welcome $id!');</script> " ;
 								echo '<meta http-equiv="refresh" content="0; URL= patient profile.php">';
 							}
@@ -172,7 +176,7 @@
 						{
 							if(mysqli_num_rows($sendsql)>0)
 							{
-
+								$_SESSION["user1"] = $id;
 								echo "<script>alert('Welcome $id!');</script> " ;
 								echo '<meta http-equiv="refresh" content="0; URL=employee profile.php">';
 							}

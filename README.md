@@ -109,27 +109,44 @@ Run `just` with no arguments to list every recipe. The ones you'll use daily:
 | `just db-stop` | Stop MariaDB (graceful shutdown, falls back to killing our `mariadbd.exe`) |
 | `just db-seed` | Import `mypenawar.sql` if the `mypenawar` DB is missing (setup.ps1 already did it once) |
 | `just lint` | `php -l` syntax-check every PHP file |
-| `just test` | HTTP smoke-test suite: lint gate + no-DB pages + auth guard; DB flows when 3307 answers (else SKIP) |
+| `just test` | 20-check suite: lint + secret gates, static/portal pages, auth guards, and the seeded DB flows (starts MariaDB itself; a broken DB **fails**) |
 | `just claudex` | Launch Claude Code (Sonnet, all permissions) |
 
 ## Testing
 
-`just test` runs [`tests/smoke.ps1`](tests/smoke.ps1) — an HTTP smoke-test suite:
+`just test` runs [`tests/smoke.ps1`](tests/smoke.ps1) — **20 checks**:
 
 1. **Lint gate** — `php -l` over every `.php` file (same sweep as `just lint`).
-2. **HTTP checks** — boots its **own** dev server on a spare port (**8614**, same command
+2. **Secret gate** — sweeps the tree for live-looking credentials (long hex API keys,
+   credentials assigned long literals, known token prefixes). Committed
+   `REPLACE_WITH_...` placeholders are the intended state; a real key reappearing
+   fails the suite. Vendored PHPMailer, images and the git-ignored `.mcp.json` are
+   out of scope.
+3. **HTTP checks** — boots its **own** dev server on a spare port (**8614**, same command
    shape as `just serve`) so it never fights a `just start` server on 8112, then asserts:
-   - `/index.html` 200 and non-empty
-   - `/aboutus.html` and `/contact.html` 200
+   - `/index.html`, `/aboutus.html`, `/contact.html` each render **their own** headings
+     ("Compassionate care for…", "A clinic built around its community", "Get in touch")
    - `/login.php` 200 and rendering the login form
    - `/index.php` 200 (the output-test scratch page)
-   - unauthenticated `patient profile.php` → 302 to `login.php`, warning-free
-     (the portal auth guard — works with or without the DB)
-3. **DB-backed flows** — only when MariaDB answers on `127.0.0.1:3307`
-   (`just db-start`): a seeded patient login POST succeeds, the logged-in profile
-   page renders the seeded patient row, and the staff appointment list renders
-   seeded rows. When the DB is down these print `SKIP` lines instead of failing,
-   so the suite is green either way.
+   - unauthenticated `patient profile.php`, `appList2.php` **and**
+     `employee profile.php` → 302 to `login.php`, warning-free (the three portal auth
+     guards — they work with or without the DB)
+4. **DB-backed flows** — **mandatory**, not optional. The suite starts the portable
+   MariaDB itself when 3307 is silent (same mechanism as `just db-start`) and stops it
+   again only if it started it. It then asserts:
+   - the seeded patient login (`angela`) forwards to the profile, which renders her
+     seeded row
+   - `appList2.php` returns **exactly 1** appointment row, cell for cell
+   - the seeded **staff** login (`D1946`/`DE@1946`, `user=staff`) forwards to
+     `employee profile.php`, which renders Desmond Soo's row
+   - `patient.php` returns **exactly 5** seeded appointment rows with the seeded content
+   - `monthly report.php` aggregates **exactly 3** service rows
+     (SV007 1/30.00, SV008 1/20.00, SV009 1/48.00)
+   - a **rejected** login grants no session — the portal guard still 302s afterwards
+
+   A database that is installed but broken **FAILS** the suite. Checks degrade to `SKIP`
+   only on a machine where MariaDB is genuinely not installed, and `just test` passes
+   `-RequireDb` so even that is a failure in the normal loop.
 
 Read-only by design even with the DB up: no booking inserts, no `code.php`
 updates/deletes — smoke checks must not mutate the seeded database.
@@ -198,7 +215,7 @@ my-penawar/
   image/                  # logos, staff photos, background
   style.css               # legacy 2022 stylesheet — used only by the dead variants now
   justfile, setup.ps1     # dev recipes (incl. db-start/db-stop/db-seed) + one-time machine setup (incl. portable MariaDB)
-  tests/                  # smoke.ps1 — HTTP smoke-test suite; DB flows auto-SKIP when 3307 is down (`just test`)
+  tests/                  # smoke.ps1 — 20-check suite (`just test`); starts MariaDB itself, DB flows are mandatory
   docs/images/            # README screenshots (home, login, services, team, appointments)
   .docs/                  # numbered documentation set
   .claude/                # skills, hooks, settings, memory

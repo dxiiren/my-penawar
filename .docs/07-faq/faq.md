@@ -50,11 +50,14 @@ flow (`recover_psw.php`) is the only consumer.
 
 ## Is there a test suite or CI?
 
-No CI, but there is a local suite: `just test` runs `tests/smoke.ps1` — the `php -l`
-sweep, HTTP checks of the no-DB pages (home, about, contact, the login form,
-`index.php`), the auth-guard redirect, and — when MariaDB answers on 3307 — the
-seeded patient login plus two data pages rendering seeded rows (read-only; DB checks
-print `SKIP` when the DB is down). All against a private server on port 8614.
+No CI, but there is a local suite: `just test` runs `tests/smoke.ps1` — 20 checks: the
+`php -l` sweep, a secret sweep, per-page heading assertions for the static pages (home,
+about, contact), the login form and `index.php`, the three portal auth-guard redirects,
+and the seeded DB flows (patient **and** staff login, `appList2.php`'s single row,
+`patient.php`'s five rows, `monthly report.php`'s three aggregate rows — all read-only).
+The DB checks are **mandatory**: the suite starts MariaDB itself when 3307 is silent, and
+a database that is installed but broken fails the run instead of skipping. All against a
+private server on port 8614.
 `just lint` remains available as the fast syntax-only gate; `06-troubleshooting`
 documents the runtime failure modes.
 

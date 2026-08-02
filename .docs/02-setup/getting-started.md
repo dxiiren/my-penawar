@@ -69,7 +69,7 @@ would have to touch all of them — another reason to keep the DB on 3307.
 
 ```powershell
 just lint      # php -l over every PHP file — must pass
-just test      # smoke suite; with the DB up the DB flows run too (else SKIP)
+just test      # 20-check suite; starts MariaDB itself, and fails if the DB is broken
 just           # list all recipes
 ```
 

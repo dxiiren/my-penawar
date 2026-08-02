@@ -11,11 +11,13 @@
    (or `just serve` in a second terminal to watch request logs).
 2. Edit the page script — each screen is one root-level `.php`/`.html` file; there is no
    build step, so a browser refresh shows the change immediately.
-3. `just lint` — `php -l` over every PHP file — then `just test`, the HTTP smoke suite
-   (`tests/smoke.ps1`): the same lint sweep plus the no-DB pages and the auth-guard
-   redirect on a private server on port 8614 — and, when MariaDB answers on 3307
-   (`just db-start`), the seeded DB flows too (read-only; SKIPped when the DB is
-   down). No composer, no PHPUnit, no CI — these two local gates are the
+3. `just lint` — `php -l` over every PHP file — then `just test`, the 20-check suite
+   (`tests/smoke.ps1`): the same lint sweep, a secret sweep, the static pages'
+   own headings, the three portal auth-guard redirects on a private server on port
+   8614, and the seeded DB flows (read-only). **The DB flows are mandatory** — the
+   suite starts MariaDB itself when 3307 is silent (and stops it again if it started
+   it), and an installed-but-broken database fails the run rather than skipping it.
+   No composer, no PHPUnit, no CI — these two local gates are the
    automation; treat a failure in either as a blocker. Write flows (booking insert,
    `code.php` update/delete) still deserve a manual browser check.
 4. Commit with a Conventional Commits message (`feat:`, `fix:`, `docs:` ...) — the

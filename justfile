@@ -73,10 +73,12 @@ db-seed: _require-mariadb
 lint: _require-php
     $fail = 0; Get-ChildItem -Path '{{justfile_directory()}}' -Filter *.php -Recurse -File | Where-Object { $_.FullName -notlike '*\.git\*' } | ForEach-Object { $out = & '{{php}}' -l $_.FullName 2>&1; if ($LASTEXITCODE -ne 0) { $fail++; Write-Host ($out -join "`n") -ForegroundColor Red } }; if ($fail -gt 0) { Write-Error "$fail PHP file(s) failed php -l"; exit 1 } else { Write-Host "All PHP files pass php -l" -ForegroundColor Green }
 
-# HTTP smoke-test suite (tests/smoke.ps1): lint gate + the no-DB pages against a private
-# server on port 8614 (so it never fights `just start`). DB-backed pages are out of scope.
+# Test suite (tests/smoke.ps1): lint + secret gates, the static/portal pages against a
+# private server on port 8614 (so it never fights `just start`), and the seeded DB flows.
+# The suite starts MariaDB itself when it is down (same mechanism as db-start) and stops it
+# again if it started it. -RequireDb makes a broken/absent database a FAILURE, never a SKIP.
 test: _require-php
-    powershell -NoProfile -ExecutionPolicy Bypass -File '{{justfile_directory()}}\tests\smoke.ps1'; exit $LASTEXITCODE
+    powershell -NoProfile -ExecutionPolicy Bypass -File '{{justfile_directory()}}\tests\smoke.ps1' -RequireDb; exit $LASTEXITCODE
 
 # ─── Tools ───────────────────────────────────────────────
 

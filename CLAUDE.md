@@ -24,11 +24,11 @@ original 2022 design lives in git history (pre-facelift commit `921630e`).
 | --- | --- | --- |
 | Language | **PHP 8.4** (plain, no framework) | Page-per-file scripts at the repo root; code written for PHP ~8.1/XAMPP in 2022, so expect deprecation warnings on 8.4 |
 | Database | MariaDB 11.4 (portable) via `mysqli` | `db_config.php` connects to `localhost:3307`, db `mypenawar`, user `root`, empty password. setup.ps1 installs MariaDB to `%LOCALAPPDATA%\Programs\mariadb` and imports `mypenawar.sql` (tables: `booking`, `employee`, `patient`, `payment`, `service`); lifecycle via `just db-start` / `db-stop` / `db-seed` — `just start` never auto-starts it |
-| Sessions | native `$_SESSION` | `login.php` stores the logged-in username as `$_SESSION["user1"]`; the portal pages (`patient profile.php`, `employee profile.php`, `appList2.php`) guard it at the top of the file — `session_start()` before any output, anonymous hits get `header("Location: login.php"); exit;` — copy that pattern for new session pages |
+| Sessions | native `$_SESSION` | `login.php` stores the logged-in username as `$_SESSION["user1"]` **only after the credential query matches** (writing it from the raw POST first would hand every rejected login a valid session); the portal pages (`patient profile.php`, `employee profile.php`, `appList2.php`) guard it at the top of the file — `session_start()` before any output, anonymous hits get `header("Location: login.php"); exit;` — copy that pattern for new session pages |
 | Frontend | Tailwind CDN (2026 facelift) | Shared `partials/head.php` / `nav.php` / `footer.php` on PHP pages; static `.html` pages carry an identical inline copy (keep in sync). Font Awesome, Google Fonts, typed.js (home), jQuery/jQuery UI (datepicker pages) from CDNs — internet required. `style.css` is legacy, used only by `login2.php`/`index2.php`/`demo.html` |
 | Mail | Vendored PHPMailer 5.x in `Mail/phpmailer/` + SMTP.js | Used by the password-recovery flow; never edit the vendored library |
 | Serving | PHP built-in dev server | `just start` → `php -S 127.0.0.1:8112 -t .` |
-| Quality | `php -l` + HTTP smoke suite | `just lint` syntax-lints every PHP file; `just test` runs `tests/smoke.ps1` (no-DB pages + auth guard on a private port-8614 server; seeded DB flows when 3307 answers, SKIP otherwise); no CI |
+| Quality | `php -l` + secret sweep + HTTP suite | `just lint` syntax-lints every PHP file; `just test` runs `tests/smoke.ps1` (20 checks: lint + secret gates, static/portal pages and the three auth guards on a private port-8614 server, plus the seeded DB flows). The suite **starts MariaDB itself** when 3307 is silent and stops it again if it started it; DB checks are **mandatory** — an installed-but-broken database FAILS, and `just test` passes `-RequireDb` so an absent one does too. No CI |
 | Task runner | `just` | `justfile` wraps start/serve/stop/lint/test; PHP pinned to `%LOCALAPPDATA%\Programs\php-8.4` |
 
 ### Project Structure
@@ -59,7 +59,7 @@ my-penawar/
   image/                  # logos, staff photos, background
   style.css               # legacy 2022 stylesheet — used only by the dead variants now
   justfile, setup.ps1     # dev recipes (incl. db-start/db-stop/db-seed) + machine setup (incl. portable MariaDB)
-  tests/                  # smoke.ps1 — HTTP smoke-test suite; DB flows auto-SKIP when 3307 is down (`just test`)
+  tests/                  # smoke.ps1 — 20-check suite (`just test`); starts MariaDB itself, DB flows are mandatory
   .docs/                  # numbered documentation set
   .claude/                # skills, hooks, settings, memory
 ```

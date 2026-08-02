@@ -18,7 +18,7 @@
 | `just db-stop` | Stop MariaDB: graceful `mariadb-admin shutdown` first, then kills any `mariadbd.exe` from OUR install dir only |
 | `just db-seed` | Import `mypenawar.sql` into the running server if the `mypenawar` database is missing its tables (idempotent; setup.ps1 already seeds once) |
 | `just lint` | `php -l` every `.php` file in the repo (recursive, skips `.git`); fails with a count if any file has a parse error |
-| `just test` | HTTP smoke-test suite (`tests/smoke.ps1`): lint gate + the no-DB pages + the auth-guard redirect against a private server on port **8614**; when MariaDB answers on 3307 it also drives the seeded login + two data pages (read-only), otherwise those print `SKIP` and the suite stays green. Never touches the 8112 dev server and always kills its own server |
+| `just test` | Test suite (`tests/smoke.ps1`), **20 checks**: lint gate + secret sweep, per-page heading assertions for the static pages, the three portal auth-guard redirects, and the seeded DB flows (patient + staff login, `appList2` 1 row, `patient.php` 5 rows, `monthly report.php` 3 aggregate rows) against a private server on port **8614**. **Starts MariaDB itself** when 3307 is silent and stops it again only if it started it; a broken DB **fails** the suite (`-RequireDb`, which this recipe passes, makes an absent one fail too). Never touches the 8112 dev server and always kills its own server |
 
 ## Claude Code launchers
 
@@ -41,8 +41,9 @@
 - One-time machine setup is not a recipe: `pwsh ./setup.ps1` (idempotent — see
   [../02-setup/getting-started.md](../02-setup/getting-started.md)).
 - There are no build/format recipes because the repo has no build step or formatter.
-  The automated gates are `lint` (syntax) and `test` (HTTP smoke suite: no-DB pages
-  always; seeded DB flows when 3307 answers). Write flows (booking insert,
+  The automated gates are `lint` (syntax) and `test` (the 20-check suite: lint +
+  secret sweep, static/portal pages, and the seeded DB flows — which are mandatory,
+  and which start the database themselves). Write flows (booking insert,
   `code.php` update/delete) still deserve a manual browser check.
 
 ## Related docs

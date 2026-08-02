@@ -70,9 +70,17 @@ muting errors globally.
 `session_start()` mid-page ("headers already sent") and then query with an undefined
 `$id` ("Undefined variable") when hit anonymously. Each now has a top-of-file auth
 guard — `session_start()` before any output, then `header("Location: login.php");
-exit;` for anonymous visitors — so those hits are a clean, warning-free 302 (the smoke
-suite asserts it). If a portal page ever warns like that again, its guard was removed
-or a new page skipped the pattern.
+exit;` for anonymous visitors — so those hits are a clean, warning-free 302 (the suite
+asserts it for all three pages). If a portal page ever warns like that again, its guard
+was removed or a new page skipped the pattern.
+
+**FIXED — a rejected login used to hand out a session.** `login.php` wrote
+`$_SESSION["user1"] = $_POST["id"]` *before* running the credential query, so any POST
+with a bogus username satisfied the portal guards above — the guards existed but proved
+nothing. The assignment now happens only inside the verified-match branch of each of the
+patient and staff paths, and the suite pins it (bogus login → the guard still 302s).
+`login2.php` (a dead 2022 variant, not linked from the app) still carries the original
+pattern; do not copy it.
 
 ## Page renders unstyled / hero animation missing
 

@@ -36,8 +36,9 @@ http://127.0.0.1:8112 (home page at `/index.html`) with every page working. Skip
 ## [03-development/workflow.md](03-development/workflow.md)
 
 Edit the page file, refresh the browser (no build step), `just lint` + `just test`
-(HTTP smoke suite on its own port 8614: no-DB pages + auth guard always, seeded DB
-flows when 3307 answers) before every commit. Quote the four space-bearing filenames,
+(20-check suite on its own port 8614: lint + secret gates, static/portal pages, the
+three auth guards, and the seeded DB flows — which are mandatory and start MariaDB
+themselves) before every commit. Quote the four space-bearing filenames,
 never touch vendored `Mail/phpmailer/`, don't mute errors to hide legacy warnings, and
 never copy the interpolated-SQL / plaintext-password patterns into new code. Commits
 follow Conventional Commits via the `/commit` skill; PRs via `/create-pr`.
@@ -54,8 +55,8 @@ none of it exists today.
 The `just` recipe table: `start` (background server on 8112, self-stopping first),
 `serve` (foreground), `stop` (kills only this repo's `php.exe`), `db-start` /
 `db-stop` / `db-seed` (portable MariaDB on 3307), `lint` (`php -l` everything),
-`test` (HTTP smoke suite, private server on 8614; DB flows auto-SKIP when 3307 is
-down), plus `claudex`/`claudeo`/`claudeh` Claude Code launchers. PHP is pinned to
+`test` (20-check suite, private server on 8614; starts MariaDB itself and FAILS on a
+broken DB), plus `claudex`/`claudeo`/`claudeh` Claude Code launchers. PHP is pinned to
 `%LOCALAPPDATA%\Programs\php-8.4\php.exe`, MariaDB to
 `%LOCALAPPDATA%\Programs\mariadb`; `PORT` env var can override 8112 for a one-off.
 
@@ -71,8 +72,9 @@ Real failure modes with observed symptoms: the two shapes of the DB-down
 `mysqli_sql_exception` (error-only 200 body vs rendered-page-then-error — fix:
 `just db-start`), `/` showing the scratch page instead of the site, the `_require-php`
 guard message, a missing `mysqli` extension, cosmetic PHP 8.4 warnings (the
-unauthenticated-portal warning class is FIXED by the auth guards), `just stop`
-reporting 0 processes, and port-8112 conflicts.
+unauthenticated-portal warning class is FIXED by the auth guards, as is the rejected
+login that used to hand out a session), `just stop` reporting 0 processes, and
+port-8112 conflicts.
 
 ## [07-faq/faq.md](07-faq/faq.md)
 
@@ -80,4 +82,4 @@ Quick answers: why `/` isn't the home page, when you actually need the database
 (`just db-start`), why port 3307, where test accounts live (seeded in the dump,
 plaintext), why duplicate login pages exist, why filenames have spaces, why PHPMailer
 stays untouched, and what the automated gates cover (`just lint` syntax sweep +
-`just test` smoke suite incl. DB flows when the DB is up).
+`just test` 20-check suite, whose DB flows are mandatory).
