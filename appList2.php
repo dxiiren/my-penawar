@@ -1,3 +1,13 @@
+<?php
+	// Auth guard: this portal page needs a logged-in session. Redirect anonymous
+	// direct hits to the login page BEFORE any output, and exit so nothing below
+	// runs (no undefined-$id warnings, no DB query for a user that isn't there).
+	session_start();
+	if (!isset($_SESSION["user1"])) {
+		header("Location: login.php");
+		exit;
+	}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,7 +37,6 @@
 
 						$connect = mysqli_connect($hostname, $username, $password, $dbname) OR DIE("Connection Failed");
 
-						session_start();
 						if(isset($_SESSION["user1"]))
 						$id = $_SESSION["user1"];
 
