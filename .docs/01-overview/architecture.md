@@ -15,7 +15,7 @@ browser → php -S 127.0.0.1:8112 -t .
              ├─ session_start() (often mid-page)
              ├─ require 'db_config.php'  OR  inline mysqli_connect(...)
              ├─ if ($_POST[...]) { ... mysqli_query ... }
-             └─ echoes its own HTML (Bootstrap 4 / jQuery from CDNs)
+             └─ echoes its own HTML (Tailwind CDN via partials/head.php)
 ```
 
 `php -S` serves `index.php` for `/` (not `index.html` — the real home page must be
@@ -66,10 +66,17 @@ connects).
 
 ## Frontend
 
-Shared `style.css` plus per-page inline `<style>` blocks. Bootstrap 4, jQuery 3,
-Font Awesome, and typed.js all come from CDNs — internet is required for full styling.
-`get_data.php` is the one AJAX endpoint (jQuery POST from admin pages, returns an HTML
-table fragment for a patient IC).
+Modernized in 2026 to a single Tailwind-CDN design system (teal/slate palette, Plus
+Jakarta Sans). PHP pages include the shared partials `partials/head.php`,
+`partials/nav.php`, and `partials/footer.php`; the static `.html` pages carry an
+identical inline copy of those blocks (kept in sync by hand — `php -S` cannot include
+into `.html`). Tailwind, Font Awesome, Google Fonts, typed.js (home hero), and
+jQuery/jQuery UI (datepicker pages) all come from CDNs — internet is required for full
+styling. `style.css` is legacy-only: it is still linked by the dead variants
+(`login2.php`, `index2.php`, `demo.html`) and untouched otherwise. The original 2022
+design is preserved in git history (pre-facelift commit `921630e`). `get_data.php` is
+the one AJAX endpoint (jQuery POST from admin pages, returns an HTML table fragment for
+a patient IC).
 
 ## Related docs
 

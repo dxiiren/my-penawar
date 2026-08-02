@@ -10,7 +10,9 @@ Semenyih, Selangor. Public pages (home, about us, contact, members) are static H
 dynamic pages (patient/staff login and registration, appointment booking, appointment
 admin, monthly report, receipts, password recovery) are page-per-file PHP scripts using
 raw `mysqli` against a MySQL/MariaDB `mypenawar` database (schema + seed data committed
-in `mypenawar.sql`). No framework, no composer, no npm.
+in `mypenawar.sql`). No framework, no composer, no npm. The UI was modernized in 2026
+(Tailwind CDN, shared `partials/`); the backend is intentionally unchanged, and the
+original 2022 design lives in git history (pre-facelift commit `921630e`).
 
 - **Repo:** GitHub — `github.com/dxiiren/my-penawar`
 - **Runs locally only** — no CI/CD, no deployment target. `just start` serves on
@@ -23,7 +25,7 @@ in `mypenawar.sql`). No framework, no composer, no npm.
 | Language | **PHP 8.4** (plain, no framework) | Page-per-file scripts at the repo root; code written for PHP ~8.1/XAMPP in 2022, so expect deprecation warnings on 8.4 |
 | Database | MySQL/MariaDB via `mysqli` | `db_config.php` connects to `localhost:3307`, db `mypenawar`, user `root`, empty password; schema + seed rows in `mypenawar.sql` (tables: `booking`, `employee`, `patient`, `payment`, `service`) |
 | Sessions | native `$_SESSION` | `login.php` stores the logged-in username as `$_SESSION["user1"]`; several pages call `session_start()` mid-page (warns after output) |
-| Frontend | HTML + `style.css` + inline `<style>` | Bootstrap 4, jQuery 3, Font Awesome, typed.js all loaded from CDNs — internet required for full styling |
+| Frontend | Tailwind CDN (2026 facelift) | Shared `partials/head.php` / `nav.php` / `footer.php` on PHP pages; static `.html` pages carry an identical inline copy (keep in sync). Font Awesome, Google Fonts, typed.js (home), jQuery/jQuery UI (datepicker pages) from CDNs — internet required. `style.css` is legacy, used only by `login2.php`/`index2.php`/`demo.html` |
 | Mail | Vendored PHPMailer 5.x in `Mail/phpmailer/` + SMTP.js | Used by the password-recovery flow; never edit the vendored library |
 | Serving | PHP built-in dev server | `just start` → `php -S 127.0.0.1:8112 -t .` |
 | Quality | `php -l` + HTTP smoke suite | `just lint` syntax-lints every PHP file; `just test` runs `tests/smoke.ps1` (no-DB pages on a private port-8614 server); no CI |
@@ -33,8 +35,9 @@ in `mypenawar.sql`). No framework, no composer, no npm.
 
 ```
 my-penawar/
-  index.html              # real home page (navbar, typed.js hero, footer)
+  index.html              # real home page (Tailwind hero + typed.js, services, footer)
   index.php               # PHP output-test scratch page (served for "/" by php -S)
+  partials/               # shared head/nav/footer includes for the PHP pages (2026 facelift)
   aboutus.html, contact.html, member.html, demo.html, notification.html, receipt.html
   login.php               # patient/staff login + patient registration (DB at bottom of file)
   login2.php, index2.php  # older login variants (index2 queries a nonexistent `staff` table)
@@ -54,7 +57,7 @@ my-penawar/
   mypenawar.sql           # phpMyAdmin dump: schema + seed data for all 5 tables
   Mail/phpmailer/         # vendored PHPMailer 5.x (third-party, do not edit)
   image/                  # logos, staff photos, background
-  style.css               # shared stylesheet
+  style.css               # legacy 2022 stylesheet — used only by the dead variants now
   justfile, setup.ps1     # dev recipes + one-time machine setup
   tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
   .docs/                  # numbered documentation set
@@ -92,8 +95,11 @@ my-penawar/
 - Several page filenames contain spaces (`employee profile.php`, `patient booking.php`,
   `monthly report.php`, `patient profile.php`) — always quote them in shell commands.
 - `Mail/phpmailer/` is a vendored third-party library — never edit or lint-fix it.
-- CDN assets (Bootstrap/jQuery/Font Awesome/typed.js) need internet; offline, pages render
-  unstyled — expected, not a bug.
+- CDN assets (Tailwind Play CDN / Google Fonts / Font Awesome / typed.js / jQuery UI) need
+  internet; offline, pages render unstyled — expected, not a bug.
+- Shared header/nav/footer markup lives in `partials/` (PHP includes). The static `.html`
+  pages cannot include PHP, so they carry an identical inline copy — when changing the
+  shared chrome, update `partials/` AND the four static pages together.
 
 ## Project Skills
 

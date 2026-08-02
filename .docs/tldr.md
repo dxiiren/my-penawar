@@ -18,8 +18,10 @@ handling, SQL, and session use. Login stores identity in `$_SESSION["user1"]`
 (patient IC or staff username); five tables (`booking`, `employee`, `patient`,
 `payment`, `service`) hold the data; `db_config.php` targets `localhost:3307` (2022
 XAMPP default) and many pages re-declare the same connection inline. Since PHP 8.1
-`mysqli` throws, so the legacy `OR DIE` guards are dead code. Frontend is Bootstrap 4 /
-jQuery from CDNs.
+`mysqli` throws, so the legacy `OR DIE` guards are dead code. Frontend is a 2026
+Tailwind-CDN facelift (shared header/nav/footer partials in `partials/`); jQuery +
+jQuery UI remain on the datepicker pages, and `style.css` survives only for the dead
+legacy variants.
 
 ## [02-setup/getting-started.md](02-setup/getting-started.md)
 

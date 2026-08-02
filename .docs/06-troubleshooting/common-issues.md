@@ -65,8 +65,8 @@ them only in pages you are already changing, never by muting errors globally.
 
 ## Page renders unstyled / hero animation missing
 
-Bootstrap 4, jQuery, Font Awesome, and typed.js load from CDNs. No internet → bare
-HTML. Expected.
+Tailwind (Play CDN), Google Fonts, Font Awesome, typed.js, and jQuery/jQuery UI load
+from CDNs. No internet → bare HTML. Expected.
 
 ## `just stop` says `Stopped 0 project php.exe process(es)`
 

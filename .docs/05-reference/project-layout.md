@@ -9,8 +9,9 @@
 
 ```
 my-penawar/
-  index.html              # real home page (navbar, typed.js hero, footer)
+  index.html              # real home page (Tailwind hero + typed.js, services, footer)
   index.php               # PHP output-test scratch page (served for "/" by php -S)
+  partials/               # shared head/nav/footer includes for the PHP pages (2026 facelift)
   aboutus.html            # clinic history + address
   contact.html            # contact info
   member.html             # staff gallery
@@ -34,7 +35,7 @@ my-penawar/
   mypenawar.sql           # phpMyAdmin dump: schema + seed data for all 5 tables
   Mail/phpmailer/         # vendored PHPMailer 5.x (third-party, do not edit)
   image/                  # logos, staff photos, background
-  style.css               # shared stylesheet
+  style.css               # legacy 2022 stylesheet — used only by the dead variants now
   justfile                # dev recipes (start/serve/stop/lint/test + claude launchers)
   tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
   setup.ps1               # one-time machine setup (idempotent)
@@ -49,7 +50,7 @@ my-penawar/
 
 | You want to... | Touch |
 | --- | --- |
-| Change clinic copy/branding | `index.html`, `aboutus.html`, `contact.html`, `member.html`, `style.css` |
+| Change clinic copy/branding | `index.html`, `aboutus.html`, `contact.html`, `member.html` (+ mirror shared header/footer edits in `partials/`) |
 | Change login or registration | `login.php` (ignore `login2.php`/`index2.php` — dead variants) |
 | Change booking rules (slots, times) | `patient booking.php` (form + slot check) |
 | Change booking admin/editing | `patient.php` → `patientedit.php` → `code.php` |

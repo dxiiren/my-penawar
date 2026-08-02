@@ -14,13 +14,21 @@ monthly reports, receipts, password recovery — are page-per-file PHP scripts u
 | --- | --- |
 | ![Home page](docs/images/home.png) | ![Login page](docs/images/login.png) |
 
+| Services (`index.html`) | Our Team (`member.html`) |
+| --- | --- |
+| ![Services section](docs/images/services.png) | ![Team page](docs/images/team.png) |
+
 ## About this project
 
-MyPenawar was built in 2022 as a final-year university project and published to GitHub in
-2023. It is preserved here exactly as submitted — page-per-file raw PHP, string-built
-`mysqli` queries, plaintext seed passwords and all — as a snapshot of that stage, not as an
-example of current practice. For how the same developer writes PHP today, see the Laravel 12
-repos [job-portal](https://github.com/dxiiren/job-portal) and
+MyPenawar was originally built in 2022 as a final-year university project and published
+to GitHub in 2023. In 2026 the UI was modernized into a single Tailwind-CDN design
+system (teal/slate clinic look, shared header/nav/footer partials) — the original 2022
+design is preserved in git history at the
+[pre-facelift commit](https://github.com/dxiiren/my-penawar/tree/921630e69add4d269ab9a0be3c28280eadbdc511).
+The backend is intentionally left as submitted — page-per-file raw PHP, string-built
+`mysqli` queries, plaintext seed passwords and all — as a snapshot of that stage, not as
+an example of current practice. For how the same developer writes PHP today, see the
+Laravel 12 repos [job-portal](https://github.com/dxiiren/job-portal) and
 [book-review](https://github.com/dxiiren/book-review), which supersede these patterns.
 
 ## Prerequisites
@@ -145,8 +153,9 @@ page are cosmetic — don't "fix" them by suppressing errors globally.
 
 ### Page renders without styling
 
-Bootstrap, jQuery, Font Awesome, and typed.js load from CDNs — the site needs internet
-for full styling. Offline, pages render unstyled HTML. Expected, not a bug.
+Tailwind (Play CDN), Google Fonts, Font Awesome, typed.js, and jQuery/jQuery UI load
+from CDNs — the site needs internet for full styling. Offline, pages render unstyled
+HTML. Expected, not a bug.
 
 More in [`.docs/06-troubleshooting/common-issues.md`](.docs/06-troubleshooting/common-issues.md).
 
@@ -154,8 +163,9 @@ More in [`.docs/06-troubleshooting/common-issues.md`](.docs/06-troubleshooting/c
 
 ```
 my-penawar/
-  index.html              # real home page (navbar, typed.js hero, footer)
+  index.html              # real home page (Tailwind hero + typed.js, services, footer)
   index.php               # PHP output-test scratch page (served for "/" by php -S)
+  partials/               # shared head/nav/footer includes for the PHP pages (2026 facelift)
   aboutus.html, contact.html, member.html, demo.html, notification.html, receipt.html
   login.php               # patient/staff login + patient registration
   login2.php, index2.php  # older login variants (index2 queries a nonexistent `staff` table)
@@ -175,10 +185,10 @@ my-penawar/
   mypenawar.sql           # phpMyAdmin dump: schema + seed data (booking, employee, patient, payment, service)
   Mail/phpmailer/         # vendored PHPMailer 5.x (third-party, do not edit)
   image/                  # logos, staff photos, background
-  style.css               # shared stylesheet
+  style.css               # legacy 2022 stylesheet — used only by the dead variants now
   justfile, setup.ps1     # dev recipes + one-time machine setup
   tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
-  docs/images/            # README screenshots (home.png, login.png)
+  docs/images/            # README screenshots (home, login, services, team)
   .docs/                  # numbered documentation set
   .claude/                # skills, hooks, settings, memory
 ```
