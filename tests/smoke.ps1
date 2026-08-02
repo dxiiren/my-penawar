@@ -4,23 +4,21 @@
     - Boots ITS OWN php dev server on a spare port (default 8614) using the same
       command shape as `just serve` (pinned PHP 8.4, docroot = repo root), so it
       never fights a `just start` server on 8112.
-    - Checks only what works WITHOUT MySQL (per README "Demo / local access"):
-      static pages + the login form render.
+    - Always checks the no-DB pages (static pages + login form render) and the
+      auth guard (unauthenticated portal hit 302s to login.php, warning-free).
+    - When MariaDB answers on 127.0.0.1:3307 (just db-start; seeded by setup.ps1
+      / just db-seed), ALSO drives the real DB flows: a seeded patient login and
+      two data pages rendering seeded rows. When the DB is down those checks are
+      SKIPped (yellow lines) instead of failing — the suite stays green either way.
     - Lints every *.php file with `php -l` as a gate.
-    - Prints one PASS/FAIL line per check; exits 1 if any check failed.
+    - Prints one PASS/FAIL/SKIP line per check; exits 1 if any check failed.
     - ALWAYS kills the server it started (finally block, scoped to this repo's
       path + this port — other projects' php.exe processes are untouched).
 
-    NOT tested — DB-dependent pages. This repo has no MySQL in the test loop, and
-    without a MySQL/MariaDB server on localhost:3307 (+ mypenawar.sql imported)
-    these pages either return a body that is just an uncaught mysqli_sql_exception
-    (pages that `require 'db_config.php'` at the top: patient.php, patientedit.php,
-    receipt.php, get_data.php, code.php, reset_psw.php) or render HTML then print
-    the same exception at the bottom (pages that connect mid-page: login.php POST
-    submission, login2.php, index2.php, "patient profile.php",
-    "patient booking.php", "employee profile.php", "monthly report.php",
-    appList2.php). recover_psw.php additionally needs SMTP. Asserting on those
-    bodies would test the absence of a database, not the app — so they're out.
+    Still NOT tested even with the DB up: recover_psw.php (needs SMTP), the dead
+    variants (login2.php, index2.php — index2 queries a nonexistent `staff`
+    table), and the write flows (booking insert, code.php update/delete) — smoke
+    checks must not mutate the seeded database.
 
     Run via `just test`, or directly:
         powershell -NoProfile -ExecutionPolicy Bypass -File tests/smoke.ps1
@@ -41,8 +39,9 @@ if (-not (Test-Path $Php)) {
     exit 1
 }
 
-$script:Passed = 0
-$script:Failed = 0
+$script:Passed  = 0
+$script:Failed  = 0
+$script:Skipped = 0
 
 function Check([bool]$Ok, [string]$Name, [string]$Detail = '') {
     if ($Ok) {
@@ -55,14 +54,21 @@ function Check([bool]$Ok, [string]$Name, [string]$Detail = '') {
     }
 }
 
-# One HTTP GET via curl.exe. Returns @{ Status; Body }.
-function Invoke-Http([string]$Url) {
+function Skip([string]$Name, [string]$Reason) {
+    Write-Host ("SKIP  {0} -- {1}" -f $Name, $Reason) -ForegroundColor Yellow
+    $script:Skipped++
+}
+
+# One HTTP call via curl.exe. Returns @{ Status; Redirect; Body }.
+# Pass the URL plus any extra curl args (-c/-b cookie jars, -d form data, ...).
+function Invoke-Http([string[]]$CurlArgs) {
     $bodyFile = [System.IO.Path]::GetTempFileName()
     try {
-        $status = & $Curl -s -o $bodyFile -w '%{http_code}' $Url
-        $body = ''
+        $meta  = & $Curl -s -o $bodyFile -w '%{http_code}|%{redirect_url}' @CurlArgs
+        $parts = "$meta".Split('|', 2)
+        $body  = ''
         if (Test-Path $bodyFile) { $body = [System.IO.File]::ReadAllText($bodyFile) }
-        return @{ Status = [int]$status; Body = $body }
+        return @{ Status = [int]$parts[0]; Redirect = "$($parts[1])"; Body = $body }
     } finally {
         Remove-Item $bodyFile -Force -ErrorAction SilentlyContinue
     }
@@ -117,6 +123,39 @@ try {
     $r = Invoke-Http "$Base/index.php"
     Check ($r.Status -eq 200 -and $r.Body -match 'PHP Output Test') `
         'GET /index.php is 200 (output-test scratch page)' "status=$($r.Status)"
+
+    # ── Auth guard (works with or without the DB: the guard exits before any
+    #    output or DB connect) ──
+    $r = Invoke-Http "$Base/patient%20profile.php"
+    Check ($r.Status -eq 302 -and $r.Redirect -match 'login\.php' -and $r.Body -notmatch 'Warning:|Deprecated:|Fatal error:') `
+        'unauthenticated GET /patient profile.php 302s to login.php, warning-free' "status=$($r.Status) redirect=$($r.Redirect)"
+
+    # ── DB-backed flows (only when MariaDB answers on 127.0.0.1:3307) ──
+    $dbUp = (Test-NetConnection 127.0.0.1 -Port 3307 -WarningAction SilentlyContinue).TcpTestSucceeded
+    if ($dbUp) {
+        $jar = Join-Path $env:TEMP ("penawar-smoke-" + [guid]::NewGuid().ToString('N') + '.jar')
+        try {
+            # Seeded patient account from mypenawar.sql (patient table, plaintext demo data).
+            $r = Invoke-Http @('-c', $jar, '-b', $jar, '-d', 'id=angela&pass=marieAngela2707&user=patient&login=1', "$Base/login.php")
+            Check ($r.Status -eq 200 -and $r.Body -match 'Welcome angela' -and $r.Body -match 'patient profile\.php') `
+                'POST seeded patient login succeeds and forwards to the profile' "status=$($r.Status)"
+
+            $r = Invoke-Http @('-c', $jar, '-b', $jar, "$Base/patient%20profile.php")
+            Check ($r.Status -eq 200 -and $r.Body -match 'Angela Marie Sulim') `
+                'GET /patient profile.php (logged in) renders the seeded patient row' "status=$($r.Status)"
+
+            $r = Invoke-Http "$Base/patient.php"
+            Check ($r.Status -eq 200 -and $r.Body -match '730727031099|Completed' -and $r.Body -notmatch 'mysqli_sql_exception') `
+                'GET /patient.php renders seeded appointment rows' "status=$($r.Status)"
+        } finally {
+            Remove-Item $jar -Force -ErrorAction SilentlyContinue
+        }
+    } else {
+        $why = 'MariaDB not answering on 127.0.0.1:3307 (just db-start)'
+        Skip 'POST seeded patient login succeeds and forwards to the profile' $why
+        Skip 'GET /patient profile.php (logged in) renders the seeded patient row' $why
+        Skip 'GET /patient.php renders seeded appointment rows' $why
+    }
 }
 finally {
     # ALWAYS tear down the server this run started — never leave it lingering, and
@@ -131,9 +170,10 @@ finally {
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 Write-Host ''
+$skipNote = if ($script:Skipped -gt 0) { " ($($script:Skipped) skipped -- DB down)" } else { '' }
 if ($script:Failed -gt 0) {
-    Write-Host "$($script:Passed) passed, $($script:Failed) failed." -ForegroundColor Red
+    Write-Host "$($script:Passed) passed, $($script:Failed) failed.$skipNote" -ForegroundColor Red
     exit 1
 }
-Write-Host "All $($script:Passed) checks passed." -ForegroundColor Green
+Write-Host "All $($script:Passed) checks passed.$skipNote" -ForegroundColor Green
 exit 0
