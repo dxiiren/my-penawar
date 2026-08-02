@@ -31,9 +31,13 @@ requested as `/index.html`).
 | flash messages | various handlers | `message.php` partial (included by admin pages) |
 
 `login.php` distinguishes patient vs staff by a radio button (`user`/`user1` POST field)
-and queries `patient` or `employee` accordingly. Several pages call `session_start()`
-after HTML output has begun — on PHP 8.4 with `display_errors` on this prints a
-"headers already sent" notice above the page. Known legacy behavior.
+and queries `patient` or `employee` accordingly. The session-dependent portal pages
+(`patient profile.php`, `employee profile.php`, `appList2.php`) start the session at the
+**top of the file** and guard it: anonymous direct hits get
+`header("Location: login.php"); exit;` before any output — no mid-page
+`session_start()` warnings, no undefined-`$id` queries. (They historically started the
+session mid-page and warned; that class is fixed — keep new session pages on the
+top-guard pattern.)
 
 ## Data model (`mypenawar.sql`)
 

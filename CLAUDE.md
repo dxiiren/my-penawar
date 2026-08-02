@@ -23,12 +23,12 @@ original 2022 design lives in git history (pre-facelift commit `921630e`).
 | Layer | Technology | Key details |
 | --- | --- | --- |
 | Language | **PHP 8.4** (plain, no framework) | Page-per-file scripts at the repo root; code written for PHP ~8.1/XAMPP in 2022, so expect deprecation warnings on 8.4 |
-| Database | MySQL/MariaDB via `mysqli` | `db_config.php` connects to `localhost:3307`, db `mypenawar`, user `root`, empty password; schema + seed rows in `mypenawar.sql` (tables: `booking`, `employee`, `patient`, `payment`, `service`) |
-| Sessions | native `$_SESSION` | `login.php` stores the logged-in username as `$_SESSION["user1"]`; several pages call `session_start()` mid-page (warns after output) |
+| Database | MariaDB 11.4 (portable) via `mysqli` | `db_config.php` connects to `localhost:3307`, db `mypenawar`, user `root`, empty password. setup.ps1 installs MariaDB to `%LOCALAPPDATA%\Programs\mariadb` and imports `mypenawar.sql` (tables: `booking`, `employee`, `patient`, `payment`, `service`); lifecycle via `just db-start` / `db-stop` / `db-seed` — `just start` never auto-starts it |
+| Sessions | native `$_SESSION` | `login.php` stores the logged-in username as `$_SESSION["user1"]`; the portal pages (`patient profile.php`, `employee profile.php`, `appList2.php`) guard it at the top of the file — `session_start()` before any output, anonymous hits get `header("Location: login.php"); exit;` — copy that pattern for new session pages |
 | Frontend | Tailwind CDN (2026 facelift) | Shared `partials/head.php` / `nav.php` / `footer.php` on PHP pages; static `.html` pages carry an identical inline copy (keep in sync). Font Awesome, Google Fonts, typed.js (home), jQuery/jQuery UI (datepicker pages) from CDNs — internet required. `style.css` is legacy, used only by `login2.php`/`index2.php`/`demo.html` |
 | Mail | Vendored PHPMailer 5.x in `Mail/phpmailer/` + SMTP.js | Used by the password-recovery flow; never edit the vendored library |
 | Serving | PHP built-in dev server | `just start` → `php -S 127.0.0.1:8112 -t .` |
-| Quality | `php -l` + HTTP smoke suite | `just lint` syntax-lints every PHP file; `just test` runs `tests/smoke.ps1` (no-DB pages on a private port-8614 server); no CI |
+| Quality | `php -l` + HTTP smoke suite | `just lint` syntax-lints every PHP file; `just test` runs `tests/smoke.ps1` (no-DB pages + auth guard on a private port-8614 server; seeded DB flows when 3307 answers, SKIP otherwise); no CI |
 | Task runner | `just` | `justfile` wraps start/serve/stop/lint/test; PHP pinned to `%LOCALAPPDATA%\Programs\php-8.4` |
 
 ### Project Structure
@@ -58,8 +58,8 @@ my-penawar/
   Mail/phpmailer/         # vendored PHPMailer 5.x (third-party, do not edit)
   image/                  # logos, staff photos, background
   style.css               # legacy 2022 stylesheet — used only by the dead variants now
-  justfile, setup.ps1     # dev recipes + one-time machine setup
-  tests/                  # smoke.ps1 — HTTP smoke-test suite, no-DB scope (`just test`)
+  justfile, setup.ps1     # dev recipes (incl. db-start/db-stop/db-seed) + machine setup (incl. portable MariaDB)
+  tests/                  # smoke.ps1 — HTTP smoke-test suite; DB flows auto-SKIP when 3307 is down (`just test`)
   .docs/                  # numbered documentation set
   .claude/                # skills, hooks, settings, memory
 ```
@@ -76,18 +76,20 @@ my-penawar/
 ## Local Development
 
 - One-time machine setup: `pwsh ./setup.ps1` (idempotent — installs Git, PHP 8.4 (with
-  mysqli enabled), uv/Python, just, the Claude Code CLI). Then `just start`.
+  mysqli enabled), portable MariaDB 11.4 (data dir initialised + `mypenawar.sql`
+  imported), uv/Python, just, the Claude Code CLI). Then `just db-start` + `just start`.
 - All day-2 commands are `just` recipes — run `just` to list them. Never invent an alternative
   command for something a recipe already covers.
 - `just stop` kills only THIS repo's server processes (matched by repo path on the command
   line) — safe to run while other projects are serving.
-- **The DB pages need MySQL/MariaDB on `localhost:3307`** with the `mypenawar` database
-  imported from `mypenawar.sql`. Without it: static pages and the login/recover forms still
-  render; pages that `require 'db_config.php'` at the top (`patient.php`, `patientedit.php`,
+- **The DB pages need MariaDB running: `just db-start`** (portable install + seeded
+  `mypenawar` database both come from setup.ps1; `just db-seed` re-imports if the DB goes
+  missing). With the DB down: static pages and the login/recover forms still render; pages
+  that `require 'db_config.php'` at the top (`patient.php`, `patientedit.php`,
   `receipt.php`, `get_data.php`, `code.php`, `reset_psw.php`) return HTTP **200** whose
   entire body is the uncaught `mysqli_sql_exception` fatal error (the dev php.ini has
   `display_errors` on, so PHP prints the error instead of sending 500); pages that connect
-  mid-page (`login.php`, profile/booking/report pages) render their HTML then print the
+  mid-page (`login.php`, booking/report pages) render their HTML then print the
   same exception at the bottom.
 - Since PHP 8.1 `mysqli` **throws** on connection/query failure — the legacy
   `OR DIE("Connection Failed")` guards never run. Don't "fix" a DB page by muting the

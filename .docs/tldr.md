@@ -18,24 +18,26 @@ handling, SQL, and session use. Login stores identity in `$_SESSION["user1"]`
 (patient IC or staff username); five tables (`booking`, `employee`, `patient`,
 `payment`, `service`) hold the data; `db_config.php` targets `localhost:3307` (2022
 XAMPP default) and many pages re-declare the same connection inline. Since PHP 8.1
-`mysqli` throws, so the legacy `OR DIE` guards are dead code. Frontend is a 2026
-Tailwind-CDN facelift (shared header/nav/footer partials in `partials/`); jQuery +
-jQuery UI remain on the datepicker pages, and `style.css` survives only for the dead
-legacy variants.
+`mysqli` throws, so the legacy `OR DIE` guards are dead code. The session-dependent
+portal pages carry a top-of-file auth guard (redirect + `exit` before any output).
+Frontend is a 2026 Tailwind-CDN facelift (shared header/nav/footer partials in
+`partials/`); jQuery + jQuery UI remain on the datepicker pages, and `style.css`
+survives only for the dead legacy variants.
 
 ## [02-setup/getting-started.md](02-setup/getting-started.md)
 
 Three steps on a stock Windows machine: `pwsh ./setup.ps1` (Git, PHP 8.4 with `mysqli`
-enabled, uv/Python, just, Claude Code — idempotent), reopen PowerShell, `just start` →
-http://127.0.0.1:8112 (home page at `/index.html`). Optionally run MariaDB/MySQL on
-`localhost:3307` and import `mypenawar.sql` to light up the dynamic pages — without it
-every SQL-running page prints a `mysqli_sql_exception`.
+enabled, portable MariaDB 11.4 with `mypenawar.sql` imported, uv/Python, just, Claude
+Code — idempotent), reopen PowerShell, `just db-start` + `just start` →
+http://127.0.0.1:8112 (home page at `/index.html`) with every page working. Skipping
+`db-start` still serves the static pages; SQL-running pages then print a
+`mysqli_sql_exception`.
 
 ## [03-development/workflow.md](03-development/workflow.md)
 
 Edit the page file, refresh the browser (no build step), `just lint` + `just test`
-(HTTP smoke suite over the no-DB pages, own port 8614) before every commit. Quote the
-four space-bearing filenames,
+(HTTP smoke suite on its own port 8614: no-DB pages + auth guard always, seeded DB
+flows when 3307 answers) before every commit. Quote the four space-bearing filenames,
 never touch vendored `Mail/phpmailer/`, don't mute errors to hide legacy warnings, and
 never copy the interpolated-SQL / plaintext-password patterns into new code. Commits
 follow Conventional Commits via the `/commit` skill; PRs via `/create-pr`.
@@ -50,11 +52,12 @@ none of it exists today.
 ## [05-reference/commands.md](05-reference/commands.md)
 
 The `just` recipe table: `start` (background server on 8112, self-stopping first),
-`serve` (foreground), `stop` (kills only this repo's `php.exe`), `lint` (`php -l`
-everything), `test` (HTTP smoke suite over the no-DB pages, private server on 8614),
-plus `claudex`/`claudeo`/`claudeh` Claude Code launchers. PHP is pinned to
-`%LOCALAPPDATA%\Programs\php-8.4\php.exe`; `PORT` env var can override 8112 for a
-one-off.
+`serve` (foreground), `stop` (kills only this repo's `php.exe`), `db-start` /
+`db-stop` / `db-seed` (portable MariaDB on 3307), `lint` (`php -l` everything),
+`test` (HTTP smoke suite, private server on 8614; DB flows auto-SKIP when 3307 is
+down), plus `claudex`/`claudeo`/`claudeh` Claude Code launchers. PHP is pinned to
+`%LOCALAPPDATA%\Programs\php-8.4\php.exe`, MariaDB to
+`%LOCALAPPDATA%\Programs\mariadb`; `PORT` env var can override 8112 for a one-off.
 
 ## [05-reference/project-layout.md](05-reference/project-layout.md)
 
@@ -64,15 +67,17 @@ plus a "where to make which change" table mapping tasks to files.
 
 ## [06-troubleshooting/common-issues.md](06-troubleshooting/common-issues.md)
 
-Real failure modes with observed symptoms: the two shapes of the no-database
-`mysqli_sql_exception` (error-only 200 body vs rendered-page-then-error), `/` showing
-the scratch page instead of the site, the `_require-php` guard message, a missing
-`mysqli` extension, cosmetic PHP 8.4 warnings, `just stop` reporting 0 processes, and
-port-8112 conflicts.
+Real failure modes with observed symptoms: the two shapes of the DB-down
+`mysqli_sql_exception` (error-only 200 body vs rendered-page-then-error — fix:
+`just db-start`), `/` showing the scratch page instead of the site, the `_require-php`
+guard message, a missing `mysqli` extension, cosmetic PHP 8.4 warnings (the
+unauthenticated-portal warning class is FIXED by the auth guards), `just stop`
+reporting 0 processes, and port-8112 conflicts.
 
 ## [07-faq/faq.md](07-faq/faq.md)
 
-Quick answers: why `/` isn't the home page, when you actually need the database, why
-port 3307, where test accounts live (seeded in the dump, plaintext), why duplicate
-login pages exist, why filenames have spaces, why PHPMailer stays untouched, and what
-the automated gates cover (`just lint` syntax sweep + `just test` no-DB smoke suite).
+Quick answers: why `/` isn't the home page, when you actually need the database
+(`just db-start`), why port 3307, where test accounts live (seeded in the dump,
+plaintext), why duplicate login pages exist, why filenames have spaces, why PHPMailer
+stays untouched, and what the automated gates cover (`just lint` syntax sweep +
+`just test` smoke suite incl. DB flows when the DB is up).

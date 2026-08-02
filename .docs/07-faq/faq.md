@@ -1,27 +1,29 @@
 # FAQ
 
 > **TL;DR** Quick answers: it's a 2022 XAMPP-era student project served on PHP 8.4;
-> `/index.html` is the real home page; the DB is optional for browsing but required for
-> anything dynamic; test credentials are in `mypenawar.sql`; four filenames contain
-> spaces; don't edit `Mail/phpmailer/`.
+> `/index.html` is the real home page; the DB is `just db-start` (portable MariaDB from
+> setup.ps1) and only needed for the dynamic pages; test credentials are in
+> `mypenawar.sql`; four filenames contain spaces; don't edit `Mail/phpmailer/`.
 
 ## Why does `/` not show the clinic site?
 
 `php -S` prefers `index.php` over `index.html`, and this repo's `index.php` is a legacy
 "PHP Output Test" scratch page. Use `/index.html`.
 
-## Do I need MySQL to work on this repo?
+## Do I need the database to work on this repo?
 
 Only for the dynamic pages. Static pages, layout/CSS work, and the login/registration
 *forms* render without it. Anything that runs SQL — logging in, booking, admin lists,
-reports, receipts, password reset — needs MariaDB/MySQL on `localhost:3307` with
-`mypenawar.sql` imported ([setup](../02-setup/getting-started.md)).
+reports, receipts, password reset — needs the DB: `just db-start` (portable MariaDB
+installed and seeded by `setup.ps1`, listening on `127.0.0.1:3307` —
+[setup](../02-setup/getting-started.md)).
 
 ## Why port 3307 and not 3306?
 
 The project was built on a XAMPP install whose MariaDB listened on 3307 (see the
 `mypenawar.sql` dump header). `db_config.php` — and the inline copies of it in several
-pages — encode that. Run your local DB on 3307 rather than editing them all.
+pages — encode that, which is why `just db-start` serves 3307 rather than editing
+them all.
 
 ## Are there test accounts?
 
@@ -49,11 +51,12 @@ flow (`recover_psw.php`) is the only consumer.
 ## Is there a test suite or CI?
 
 No CI, but there is a local suite: `just test` runs `tests/smoke.ps1` — the `php -l`
-sweep plus HTTP checks of the pages that work without MySQL (home, about, contact, the
-login form, `index.php`) against a private server on port 8614. DB-backed pages are
-deliberately untested (no MySQL in the test loop — they'd only assert a
-`mysqli_sql_exception`). `just lint` remains available as the fast syntax-only gate;
-`06-troubleshooting` documents the runtime failure modes.
+sweep, HTTP checks of the no-DB pages (home, about, contact, the login form,
+`index.php`), the auth-guard redirect, and — when MariaDB answers on 3307 — the
+seeded patient login plus two data pages rendering seeded rows (read-only; DB checks
+print `SKIP` when the DB is down). All against a private server on port 8614.
+`just lint` remains available as the fast syntax-only gate; `06-troubleshooting`
+documents the runtime failure modes.
 
 ## Where do I ask an AI assistant for help?
 

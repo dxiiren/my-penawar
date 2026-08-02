@@ -1,9 +1,10 @@
 # Common issues
 
-> **TL;DR** Almost everything you'll hit locally is one of: no MariaDB on
-> `localhost:3307` (DB pages print `mysqli_sql_exception`), a stale/missing pinned PHP
-> (`just` guard tells you to run `setup.ps1`), PHP 8.1+ exception behavior making the
-> legacy `OR DIE` guards dead code, or cosmetic warnings from 2022-era code on PHP 8.4.
+> **TL;DR** Almost everything you'll hit locally is one of: MariaDB not started
+> (`just db-start` — DB pages print `mysqli_sql_exception` without it), a stale/missing
+> pinned PHP or MariaDB (`just` guard tells you to run `setup.ps1`), PHP 8.1+ exception
+> behavior making the legacy `OR DIE` guards dead code, or cosmetic warnings from
+> 2022-era code on PHP 8.4.
 
 ## Page shows `Fatal error: Uncaught mysqli_sql_exception: No connection could be made ...`
 
@@ -19,16 +20,17 @@ target machine actively refused it in ...\db_config.php:7
   whose entire body is this error (with `display_errors` on, PHP prints the error
   instead of sending 500).
 - Pages that connect mid-page — `login.php`, `login2.php`, `index2.php`,
-  `appList2.php`, `patient booking.php`, `patient profile.php`,
-  `employee profile.php`, `monthly report.php`, `recover_psw.php` (on submit) — render
-  their full HTML first, then print the same exception at the bottom.
+  `patient booking.php`, `monthly report.php`, `recover_psw.php` (on submit) — render
+  their full HTML first, then print the same exception at the bottom. (The
+  auth-guarded portal pages — `patient profile.php`, `employee profile.php`,
+  `appList2.php` — only reach their query when you're logged in, so anonymous hits
+  now 302 to `login.php` instead of erroring.)
 
-**Cause:** no MySQL/MariaDB listening on `localhost:3307`, or the `mypenawar` database
-is missing. **Fix:**
+**Cause:** MariaDB isn't running, or the `mypenawar` database is missing. **Fix:**
 
 ```powershell
-mysql -h 127.0.0.1 -P 3307 -u root -e "CREATE DATABASE IF NOT EXISTS mypenawar"
-mysql -h 127.0.0.1 -P 3307 -u root mypenawar < mypenawar.sql
+just db-start   # portable MariaDB from setup.ps1, on 127.0.0.1:3307
+just db-seed    # only if the mypenawar database itself is missing
 ```
 
 Do **not** "fix" this by wrapping the connect in try/catch or lowering
@@ -59,9 +61,18 @@ development template when the folder is fresh).
 ## Warnings / deprecation notices above otherwise-fine pages
 
 The code targets PHP ~8.1 (XAMPP 2022) and runs here on PHP 8.4 with the development
-php.ini (`display_errors=On`). "headers already sent", "Undefined variable", and
-deprecation notices on a page that still renders are cosmetic legacy behavior — fix
-them only in pages you are already changing, never by muting errors globally.
+php.ini (`display_errors=On`). Deprecation notices on a page that still renders are
+cosmetic legacy behavior — fix them only in pages you are already changing, never by
+muting errors globally.
+
+**FIXED — unauthenticated portal hits.** The worst instance of this class is gone:
+`patient profile.php`, `employee profile.php` and `appList2.php` used to call
+`session_start()` mid-page ("headers already sent") and then query with an undefined
+`$id` ("Undefined variable") when hit anonymously. Each now has a top-of-file auth
+guard — `session_start()` before any output, then `header("Location: login.php");
+exit;` for anonymous visitors — so those hits are a clean, warning-free 302 (the smoke
+suite asserts it). If a portal page ever warns like that again, its guard was removed
+or a new page skipped the pattern.
 
 ## Page renders unstyled / hero animation missing
 

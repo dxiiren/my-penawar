@@ -7,14 +7,17 @@
 
 ## The day-2 loop
 
-1. `just start` (or `just serve` in a second terminal to watch request logs).
+1. `just db-start` (once per session, for the DB-backed pages), then `just start`
+   (or `just serve` in a second terminal to watch request logs).
 2. Edit the page script — each screen is one root-level `.php`/`.html` file; there is no
    build step, so a browser refresh shows the change immediately.
 3. `just lint` — `php -l` over every PHP file — then `just test`, the HTTP smoke suite
-   (`tests/smoke.ps1`): the same lint sweep plus the no-DB pages served from a private
-   server on port 8614. No composer, no PHPUnit, no CI — these two local gates are the
-   automation; treat a failure in either as a blocker. DB-backed behavior still needs a
-   manual check against a real MySQL on 3307.
+   (`tests/smoke.ps1`): the same lint sweep plus the no-DB pages and the auth-guard
+   redirect on a private server on port 8614 — and, when MariaDB answers on 3307
+   (`just db-start`), the seeded DB flows too (read-only; SKIPped when the DB is
+   down). No composer, no PHPUnit, no CI — these two local gates are the
+   automation; treat a failure in either as a blocker. Write flows (booking insert,
+   `code.php` update/delete) still deserve a manual browser check.
 4. Commit with a Conventional Commits message (`feat:`, `fix:`, `docs:` ...) — the
    `/commit` skill automates this. PRs via `/create-pr`, self-review via
    `/pre-pr-review`.
