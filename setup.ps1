@@ -238,7 +238,136 @@ memory_limit = 256M
     }
 }
 
-# ---------- 7. just (task runner) ----------
+# ---------- 7. MariaDB 11.4 (portable) ----------
+# The DB-backed pages need MySQL/MariaDB on 127.0.0.1:3307 with root + EMPTY password
+# (db_config.php pins all of it). Installed the same way as PHP: a portable extract at
+# a pinned path under LOCALAPPDATA -- no Windows service, no installer, no admin
+# rights. archive.mariadb.org keeps every release forever, so the pinned URL never
+# rots the way winget's php manifests do.
+$mariadbVer  = "11.4.12"
+$mariadbDir  = Join-Path $env:LOCALAPPDATA "Programs\mariadb"
+$mariadbd    = Join-Path $mariadbDir "bin\mariadbd.exe"
+$mariadbCli  = Join-Path $mariadbDir "bin\mariadb.exe"
+$mariadbData = Join-Path $mariadbDir "data"
+
+if (Test-Path $mariadbd) {
+    $mdbVer = & $mariadbd --version 2>&1 | Select-Object -First 1
+    Write-Host "[OK] MariaDB already installed: $mdbVer" -ForegroundColor Green
+} else {
+    # Mirror first, archive.mariadb.org last: the archive keeps every release forever
+    # (so the URL never rots) but throttles hard -- ~90 MB took >10 min from Asia during
+    # verification, vs ~2 min from the mirror. First mirror that answers wins.
+    $mdbMirrors = @(
+        "https://mirrors.aliyun.com/mariadb/mariadb-$mariadbVer/winx64-packages/mariadb-$mariadbVer-winx64.zip",
+        "https://mirrors.xtom.com.hk/mariadb/mariadb-$mariadbVer/winx64-packages/mariadb-$mariadbVer-winx64.zip",
+        "https://archive.mariadb.org/mariadb-$mariadbVer/winx64-packages/mariadb-$mariadbVer-winx64.zip"
+    )
+    $mdbZip = Join-Path $env:TEMP "mariadb-$mariadbVer-winx64.zip"
+    Write-Host "[INSTALL] Downloading MariaDB $mariadbVer (portable zip, ~90 MB)..." -ForegroundColor Yellow
+    try {
+        $downloaded = $false
+        foreach ($mdbZipUrl in $mdbMirrors) {
+            try {
+                Write-Host "          trying $([uri]$mdbZipUrl | Select-Object -ExpandProperty Host)..." -ForegroundColor DarkGray
+                Invoke-WebRequest -Uri $mdbZipUrl -OutFile $mdbZip -UseBasicParsing
+                $downloaded = $true
+                break
+            } catch {
+                Write-Host "          mirror failed: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
+        if (-not $downloaded) { throw "every mirror failed" }
+        $mdbTmp = Join-Path $env:TEMP "mariadb-extract"
+        if (Test-Path $mdbTmp) { Remove-Item $mdbTmp -Recurse -Force }
+        Expand-Archive -Path $mdbZip -DestinationPath $mdbTmp -Force
+        # The zip contains a single mariadb-<ver>-winx64\ folder -- move it to the pinned path.
+        $inner = Get-ChildItem $mdbTmp -Directory | Select-Object -First 1
+        $programsDir = Split-Path $mariadbDir
+        if (-not (Test-Path $programsDir)) { New-Item -ItemType Directory -Path $programsDir -Force | Out-Null }
+        Move-Item $inner.FullName $mariadbDir
+        Remove-Item $mdbZip -Force -ErrorAction SilentlyContinue
+        Remove-Item $mdbTmp -Recurse -Force -ErrorAction SilentlyContinue
+        if (Test-Path $mariadbd) {
+            Write-Host "[OK] MariaDB $mariadbVer installed to $mariadbDir" -ForegroundColor Green
+        } else {
+            Write-Host "[FAIL] MariaDB extract succeeded but mariadbd.exe missing at $mariadbd" -ForegroundColor Red
+        }
+    } catch {
+        Write-Host "[FAIL] MariaDB download/extract failed: $_" -ForegroundColor Red
+    }
+}
+
+# Initialise the data directory once (system tables + root@localhost with an EMPTY
+# password -- exactly what db_config.php expects). Port/bind-address travel on the
+# `just db-start` command line, so no config file is written here.
+if ((Test-Path $mariadbd) -and (-not (Test-Path (Join-Path $mariadbData "mysql")))) {
+    Write-Host "[INSTALL] Initialising the MariaDB data directory..." -ForegroundColor Yellow
+    $savedEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & (Join-Path $mariadbDir "bin\mariadb-install-db.exe") --datadir="$mariadbData" 2>&1 | Out-Host
+    $mdbCode = $LASTEXITCODE
+    $ErrorActionPreference = $savedEAP
+    if ($mdbCode -eq 0 -and (Test-Path (Join-Path $mariadbData "mysql"))) {
+        Write-Host "[OK] MariaDB data directory initialised at $mariadbData" -ForegroundColor Green
+    } else {
+        Write-Host "[FAIL] mariadb-install-db failed (exit $mdbCode)" -ForegroundColor Red
+    }
+} elseif (Test-Path (Join-Path $mariadbData "mysql")) {
+    Write-Host "[OK] MariaDB data directory already initialised" -ForegroundColor Green
+}
+
+# Import the app schema + seed data (idempotent: skipped when the mypenawar database
+# already has its tables). The import needs a running server -- if 3307 is quiet we
+# boot one just for the import and shut it down again; `just db-start` owns the
+# long-running server for development.
+if ((Test-Path $mariadbd) -and (Test-Path (Join-Path $mariadbData "mysql"))) {
+    $sqlDump = Join-Path $PSScriptRoot "mypenawar.sql"
+    $dbUp = (Test-NetConnection 127.0.0.1 -Port 3307 -WarningAction SilentlyContinue).TcpTestSucceeded
+    $startedForImport = $false
+    if (-not $dbUp) {
+        Start-Process -FilePath $mariadbd `
+            -ArgumentList "--datadir=`"$mariadbData`"", "--port=3307", "--bind-address=127.0.0.1" `
+            -WindowStyle Hidden
+        for ($i = 0; $i -lt 40; $i++) {
+            Start-Sleep -Milliseconds 500
+            $dbUp = (Test-NetConnection 127.0.0.1 -Port 3307 -WarningAction SilentlyContinue).TcpTestSucceeded
+            if ($dbUp) { break }
+        }
+        $startedForImport = $dbUp
+    }
+    if ($dbUp) {
+        $savedEAP = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        $tableCount = & $mariadbCli --host=127.0.0.1 --port=3307 --user=root --batch --skip-column-names `
+            -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='mypenawar'" 2>$null
+        if ([int]"$tableCount" -ge 5) {
+            Write-Host "[OK] mypenawar database already imported ($tableCount tables)" -ForegroundColor Green
+        } else {
+            Write-Host "[INSTALL] Importing mypenawar.sql (schema + seed data)..." -ForegroundColor Yellow
+            & $mariadbCli --host=127.0.0.1 --port=3307 --user=root -e "CREATE DATABASE IF NOT EXISTS mypenawar" 2>&1 | Out-Host
+            # `source` keeps the import inside the client -- no shell redirection, no
+            # PowerShell-version-dependent stdin encoding surprises.
+            & $mariadbCli --host=127.0.0.1 --port=3307 --user=root --default-character-set=utf8mb4 mypenawar `
+                -e "source $($sqlDump -replace '\\', '/')" 2>&1 | Out-Host
+            $tableCount = & $mariadbCli --host=127.0.0.1 --port=3307 --user=root --batch --skip-column-names `
+                -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='mypenawar'" 2>$null
+            if ([int]"$tableCount" -ge 5) {
+                Write-Host "[OK] mypenawar imported: $tableCount tables (booking, employee, patient, payment, service)" -ForegroundColor Green
+            } else {
+                Write-Host "[FAIL] Import ran but mypenawar has $tableCount tables -- check the output above" -ForegroundColor Red
+            }
+        }
+        $ErrorActionPreference = $savedEAP
+        if ($startedForImport) {
+            & (Join-Path $mariadbDir "bin\mariadb-admin.exe") --host=127.0.0.1 --port=3307 --user=root shutdown 2>$null
+            Write-Host "[INFO] Temporary import server stopped -- run 'just db-start' for development." -ForegroundColor Cyan
+        }
+    } else {
+        Write-Host "[WARN] Could not reach MariaDB on 127.0.0.1:3307 -- run 'just db-start' then 'just db-seed'." -ForegroundColor Yellow
+    }
+}
+
+# ---------- 8. just (task runner) ----------
 Refresh-Path
 if (Test-Command "just") {
     $justVer = & just --version 2>&1 | Select-Object -First 1
@@ -256,7 +385,7 @@ if (Test-Command "just") {
     }
 }
 
-# ---------- 8. GitHub CLI ----------
+# ---------- 9. GitHub CLI ----------
 # Used by the /create-pr and /commit skills. Run `gh auth login` once interactively.
 Refresh-Path
 if (Test-Command "gh") {
@@ -278,7 +407,7 @@ if (Test-Command "gh") {
     Write-Host "[WARN] GitHub CLI skipped -- winget unavailable. Install from https://cli.github.com/" -ForegroundColor Yellow
 }
 
-# ---------- 9. Claude MCP config (.mcp.json from stub) ----------
+# ---------- 10. Claude MCP config (.mcp.json from stub) ----------
 Write-Host ""
 Write-Host "Configuring Claude MCP servers..." -ForegroundColor Cyan
 $mcpStub = Join-Path $PSScriptRoot ".mcp.json.stub"
@@ -312,6 +441,12 @@ if (Test-Path $phpExe) {
     Write-Host "  [MISSING] php" -ForegroundColor Red
     $missing += 'php'
 }
+if (Test-Path $mariadbd) {
+    Write-Host "  [OK] mariadb ($mariadbd)" -ForegroundColor Green
+} else {
+    Write-Host "  [MISSING] mariadb" -ForegroundColor Red
+    $missing += 'mariadb'
+}
 if ($missing.Count -gt 0) {
     Write-Host ""
     Write-Host "[WARN] Some tools not found on PATH in this session: $($missing -join ', ')" -ForegroundColor Yellow
@@ -326,7 +461,8 @@ Write-Host ""
 # ---------- Next steps (manual) ----------
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. CLOSE AND REOPEN PowerShell so PATH picks up PHP." -ForegroundColor Gray
-Write-Host "  2. Start the dev server on http://127.0.0.1:8112 :" -ForegroundColor Gray
+Write-Host "  2. Start the database, then the dev server on http://127.0.0.1:8112 :" -ForegroundColor Gray
+Write-Host "       just db-start" -ForegroundColor DarkGray
 Write-Host "       just start" -ForegroundColor DarkGray
 Write-Host "  3. Login to Claude Code in the repo:  claude" -ForegroundColor Gray
 Write-Host ""

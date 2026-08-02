@@ -8,6 +8,11 @@ set shell := ["powershell.exe", "-NoProfile", "-Command"]
 php  := env_var('LOCALAPPDATA') + '\Programs\php-8.4\php.exe'
 port := env_var_or_default('PORT', '8112')
 
+# Portable MariaDB installed by setup.ps1 (no service, no admin). db_config.php pins
+# 127.0.0.1:3307 / root / empty password, so the port is NOT overridable here.
+mariadb := env_var('LOCALAPPDATA') + '\Programs\mariadb'
+db_port := '3307'
+
 # List available recipes
 default:
     @just --list
@@ -37,6 +42,28 @@ serve: _require-php
 # Stop only THIS project's php.exe, not every php on the box.
 stop:
     $procs = @(Get-CimInstance Win32_Process -Filter "Name = 'php.exe'" | Where-Object { $_.CommandLine -like '*{{justfile_directory()}}\*' }); $procs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; Write-Host "Stopped $($procs.Count) project php.exe process(es)"
+
+# ─── Database (portable MariaDB) ─────────────────────────
+
+# MariaDB from setup.ps1 — needed by every db-* recipe below.
+[private]
+_require-mariadb:
+    @if (-not (Test-Path '{{mariadb}}\bin\mariadbd.exe')) { Write-Error "MariaDB not found at {{mariadb}}`n  -> Run setup.ps1 first:  pwsh ./setup.ps1"; exit 1 }
+
+# Start MariaDB on 127.0.0.1:{{db_port}} (background). `just start` does NOT run this
+# for you — the pairing for DB-backed pages is:  just db-start && just start
+db-start: _require-mariadb
+    if ((Test-NetConnection 127.0.0.1 -Port {{db_port}} -WarningAction SilentlyContinue).TcpTestSucceeded) { Write-Host 'MariaDB already answering on 127.0.0.1:{{db_port}}' } else { Start-Process -FilePath '{{mariadb}}\bin\mariadbd.exe' -ArgumentList '--datadir="{{mariadb}}\data"', '--port={{db_port}}', '--bind-address=127.0.0.1' -WindowStyle Hidden; $ok = $false; for ($i = 0; $i -lt 40; $i++) { Start-Sleep -Milliseconds 500; if ((Test-NetConnection 127.0.0.1 -Port {{db_port}} -WarningAction SilentlyContinue).TcpTestSucceeded) { $ok = $true; break } }; if ($ok) { Write-Host 'Started: MariaDB on 127.0.0.1:{{db_port}}  (stop with: just db-stop)' } else { Write-Error 'MariaDB did not come up on port {{db_port}} — check %LOCALAPPDATA%\Programs\mariadb\data\*.err'; exit 1 } }
+
+# Stop MariaDB: graceful shutdown first, then kill any mariadbd from OUR install dir
+# (never a system-wide MySQL someone else runs on another port).
+db-stop: _require-mariadb
+    $graceful = $false; if ((Test-NetConnection 127.0.0.1 -Port {{db_port}} -WarningAction SilentlyContinue).TcpTestSucceeded) { & '{{mariadb}}\bin\mariadb-admin.exe' --host=127.0.0.1 --port={{db_port}} --user=root shutdown 2>$null; $graceful = $true; Start-Sleep -Seconds 1 }; $procs = @(Get-CimInstance Win32_Process -Filter "Name = 'mariadbd.exe'" | Where-Object { $_.CommandLine -like '*{{mariadb}}*' }); $procs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; if ($graceful) { Write-Host 'Stopped MariaDB (graceful shutdown)' } else { Write-Host "Stopped $($procs.Count) mariadbd process(es)" }
+
+# (Re-)import mypenawar.sql into the running MariaDB (idempotent: skips when the
+# five app tables already exist). setup.ps1 already does this once for you.
+db-seed: _require-mariadb
+    if (-not (Test-NetConnection 127.0.0.1 -Port {{db_port}} -WarningAction SilentlyContinue).TcpTestSucceeded) { Write-Error 'MariaDB is not running — just db-start first'; exit 1 }; $cli = '{{mariadb}}\bin\mariadb.exe'; $tables = & $cli --host=127.0.0.1 --port={{db_port}} --user=root --batch --skip-column-names -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='mypenawar'"; if ([int]"$tables" -ge 5) { Write-Host "mypenawar already seeded ($tables tables) — nothing to do" } else { & $cli --host=127.0.0.1 --port={{db_port}} --user=root -e 'CREATE DATABASE IF NOT EXISTS mypenawar'; & $cli --host=127.0.0.1 --port={{db_port}} --user=root --default-character-set=utf8mb4 mypenawar -e "source {{justfile_directory()}}/mypenawar.sql"; $tables = & $cli --host=127.0.0.1 --port={{db_port}} --user=root --batch --skip-column-names -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='mypenawar'"; if ([int]"$tables" -ge 5) { Write-Host "Imported mypenawar.sql — $tables tables" } else { Write-Error "Import failed — mypenawar has $tables tables"; exit 1 } }
 
 # ─── Quality ─────────────────────────────────────────────
 
